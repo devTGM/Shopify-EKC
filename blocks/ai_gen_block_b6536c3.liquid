@@ -1,0 +1,978 @@
+{% doc %}
+  @prompt
+    Create a premium Shopify homepage section with an editorial layout.
+    
+    Desktop layout:
+    
+    Left side shows a large, fixed lifestyle image (50–55% width).
+    
+    Right side displays rotating editorial content (45–50% width).
+    
+    Content behavior:
+    
+    Display 3–4 content items.
+    
+    Each content item includes:
+    
+    Small label (e.g. “Top Collections”)
+    
+    Large headline
+    
+    Short descriptive paragraph
+    
+    Optional CTA arrow
+    
+    Content auto-rotates every 5 seconds.
+    
+    A horizontal progress bar animates over 5 seconds for each item.
+    
+    Smooth fade or slide transitions between items.
+    
+    Interaction:
+    
+    Arrow navigation allows manual switching.
+    
+    Auto-rotation pauses on hover (desktop).
+    
+    Mobile optimization:
+    
+    Stack image on top and content below.
+    
+    Content becomes swipeable.
+    
+    Progress bar remains visible and subtle.
+    
+    Design style:
+    
+    Editorial, luxury aesthetic
+    
+    Clean typography using brand fonts
+    
+    Neutral background
+    
+    No heavy borders
+    
+    Ensure performance optimization, accessibility, and responsive behavior., I need different image for every content
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-editorial-section-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 0;
+  }
+
+  .ai-editorial-container-{{ ai_gen_id }} {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 0;
+    height: {{ block.settings.section_height }}px;
+  }
+
+  .ai-editorial-image-side-{{ ai_gen_id }} {
+    flex: 0 0 {{ block.settings.image_width }}%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-editorial-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ai-editorial-image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+
+  .ai-editorial-image-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-editorial-image-placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+
+  .ai-editorial-image-placeholder-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-editorial-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 400px;
+    max-height: 400px;
+  }
+
+  .ai-editorial-content-side-{{ ai_gen_id }} {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 80px;
+    position: relative;
+  }
+
+  .ai-editorial-slides-{{ ai_gen_id }} {
+    position: relative;
+    min-height: 300px;
+  }
+
+  .ai-editorial-slide-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+
+  .ai-editorial-slide-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+  }
+
+  .ai-editorial-label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_size }}px;
+    color: {{ block.settings.label_color }};
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .ai-editorial-headline-{{ ai_gen_id }} {
+    font-size: {{ block.settings.headline_size }}px;
+    color: {{ block.settings.headline_color }};
+    line-height: 1.2;
+    margin-bottom: 24px;
+    font-weight: 400;
+  }
+
+  .ai-editorial-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_size }}px;
+    color: {{ block.settings.description_color }};
+    line-height: 1.6;
+    margin-bottom: 32px;
+    max-width: 500px;
+  }
+
+  .ai-editorial-cta-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: {{ block.settings.cta_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.cta_size }}px;
+    font-weight: 500;
+    transition: gap 0.3s ease;
+  }
+
+  .ai-editorial-cta-{{ ai_gen_id }}:hover {
+    gap: 16px;
+  }
+
+  .ai-editorial-cta-arrow-{{ ai_gen_id }} {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-editorial-cta-{{ ai_gen_id }}:hover .ai-editorial-cta-arrow-{{ ai_gen_id }} {
+    transform: translateX(4px);
+  }
+
+  .ai-editorial-controls-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .ai-editorial-arrows-{{ ai_gen_id }} {
+    display: flex;
+    gap: 16px;
+  }
+
+  .ai-editorial-arrow-{{ ai_gen_id }} {
+    width: 48px;
+    height: 48px;
+    border: 1px solid {{ block.settings.arrow_color }};
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .ai-editorial-arrow-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.arrow_hover_bg }};
+    border-color: {{ block.settings.arrow_hover_bg }};
+  }
+
+  .ai-editorial-arrow-{{ ai_gen_id }} svg {
+    width: 20px;
+    height: 20px;
+    stroke: {{ block.settings.arrow_color }};
+    transition: stroke 0.3s ease;
+  }
+
+  .ai-editorial-arrow-{{ ai_gen_id }}:hover svg {
+    stroke: {{ block.settings.arrow_hover_color }};
+  }
+
+  .ai-editorial-progress-container-{{ ai_gen_id }} {
+    flex: 1;
+    height: 2px;
+    background-color: {{ block.settings.progress_bg }};
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-editorial-progress-bar-{{ ai_gen_id }} {
+    height: 100%;
+    background-color: {{ block.settings.progress_color }};
+    width: 0;
+    transition: width 0.1s linear;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-editorial-container-{{ ai_gen_id }} {
+      flex-direction: column;
+      height: auto;
+    }
+
+    .ai-editorial-image-side-{{ ai_gen_id }} {
+      flex: 0 0 auto;
+      height: {{ block.settings.mobile_image_height }}px;
+    }
+
+    .ai-editorial-content-side-{{ ai_gen_id }} {
+      padding: 40px 32px;
+    }
+
+    .ai-editorial-headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_size | times: 0.7 }}px;
+    }
+
+    .ai-editorial-description-{{ ai_gen_id }} {
+      font-size: {{ block.settings.description_size | times: 0.9 }}px;
+    }
+
+    .ai-editorial-slides-{{ ai_gen_id }} {
+      touch-action: pan-y;
+      min-height: 250px;
+    }
+
+    .ai-editorial-controls-{{ ai_gen_id }} {
+      margin-top: 32px;
+    }
+
+    .ai-editorial-arrows-{{ ai_gen_id }} {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-editorial-content-side-{{ ai_gen_id }} {
+      padding: 32px 20px;
+    }
+
+    .ai-editorial-headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_size | times: 0.6 }}px;
+    }
+
+    .ai-editorial-label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<editorial-carousel-{{ ai_gen_id }}
+  class="ai-editorial-section-{{ ai_gen_id }}"
+  data-autoplay="{{ block.settings.autoplay }}"
+  data-interval="{{ block.settings.rotation_interval }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-editorial-container-{{ ai_gen_id }}">
+    <div class="ai-editorial-image-side-{{ ai_gen_id }}">
+      <div class="ai-editorial-image-wrapper-{{ ai_gen_id }}">
+        {% for i in (1..4) %}
+          {% liquid
+            assign image_key = 'slide_' | append: i | append: '_image'
+            assign headline_key = 'slide_' | append: i | append: '_headline'
+            assign slide_image = block.settings[image_key]
+            assign headline = block.settings[headline_key]
+          %}
+
+          {% if headline != blank %}
+            {% if slide_image %}
+              <img
+                src="{{ slide_image | image_url: width: 1200 }}"
+                alt="{{ slide_image.alt | escape }}"
+                loading="lazy"
+                width="{{ slide_image.width }}"
+                height="{{ slide_image.height }}"
+                class="ai-editorial-image-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+                data-slide="{{ forloop.index }}"
+              >
+            {% else %}
+              <div
+                class="ai-editorial-image-placeholder-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+                data-slide="{{ forloop.index }}"
+              >
+                {{ 'lifestyle-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="ai-editorial-content-side-{{ ai_gen_id }}">
+      <div class="ai-editorial-slides-{{ ai_gen_id }}">
+        {% for i in (1..4) %}
+          {% liquid
+            assign label_key = 'slide_' | append: i | append: '_label'
+            assign headline_key = 'slide_' | append: i | append: '_headline'
+            assign description_key = 'slide_' | append: i | append: '_description'
+            assign cta_text_key = 'slide_' | append: i | append: '_cta_text'
+            assign cta_url_key = 'slide_' | append: i | append: '_cta_url'
+            assign show_cta_key = 'slide_' | append: i | append: '_show_cta'
+
+            assign label = block.settings[label_key]
+            assign headline = block.settings[headline_key]
+            assign description = block.settings[description_key]
+            assign cta_text = block.settings[cta_text_key]
+            assign cta_url = block.settings[cta_url_key]
+            assign show_cta = block.settings[show_cta_key]
+          %}
+
+          {% if headline != blank %}
+            <div
+              class="ai-editorial-slide-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+              data-slide="{{ forloop.index }}"
+            >
+              {% if label != blank %}
+                <div class="ai-editorial-label-{{ ai_gen_id }}">{{ label }}</div>
+              {% endif %}
+
+              <h2 class="ai-editorial-headline-{{ ai_gen_id }}">{{ headline }}</h2>
+
+              {% if description != blank %}
+                <div class="ai-editorial-description-{{ ai_gen_id }}">{{ description }}</div>
+              {% endif %}
+
+              {% if show_cta and cta_text != blank %}
+                <a
+                  href="{{ cta_url }}"
+                  class="ai-editorial-cta-{{ ai_gen_id }}"
+                >
+                  {{ cta_text }}
+                  <svg
+                    class="ai-editorial-cta-arrow-{{ ai_gen_id }}"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="ai-editorial-controls-{{ ai_gen_id }}">
+        <div class="ai-editorial-arrows-{{ ai_gen_id }}">
+          <button
+            class="ai-editorial-arrow-{{ ai_gen_id }} ai-editorial-prev-{{ ai_gen_id }}"
+            aria-label="Previous slide"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button
+            class="ai-editorial-arrow-{{ ai_gen_id }} ai-editorial-next-{{ ai_gen_id }}"
+            aria-label="Next slide"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+        <div class="ai-editorial-progress-container-{{ ai_gen_id }}">
+          <div class="ai-editorial-progress-bar-{{ ai_gen_id }}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</editorial-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class EditorialCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.currentSlide = 0;
+        this.slides = [];
+        this.images = [];
+        this.autoplayInterval = null;
+        this.progressInterval = null;
+        this.isPaused = false;
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+      }
+
+      connectedCallback() {
+        this.slides = Array.from(this.querySelectorAll('.ai-editorial-slide-{{ ai_gen_id }}'));
+        this.images = Array.from(this.querySelectorAll('.ai-editorial-image-{{ ai_gen_id }}, .ai-editorial-image-placeholder-{{ ai_gen_id }}'));
+        this.totalSlides = this.slides.filter(slide => slide.querySelector('.ai-editorial-headline-{{ ai_gen_id }}')).length;
+        
+        if (this.totalSlides === 0) return;
+
+        this.prevButton = this.querySelector('.ai-editorial-prev-{{ ai_gen_id }}');
+        this.nextButton = this.querySelector('.ai-editorial-next-{{ ai_gen_id }}');
+        this.progressBar = this.querySelector('.ai-editorial-progress-bar-{{ ai_gen_id }}');
+        this.slidesContainer = this.querySelector('.ai-editorial-slides-{{ ai_gen_id }}');
+
+        this.autoplay = this.dataset.autoplay === 'true';
+        this.interval = parseInt(this.dataset.interval) * 1000;
+
+        this.setupEventListeners();
+        
+        if (this.autoplay) {
+          this.startAutoplay();
+        }
+      }
+
+      setupEventListeners() {
+        if (this.prevButton) {
+          this.prevButton.addEventListener('click', () => this.previousSlide());
+        }
+        
+        if (this.nextButton) {
+          this.nextButton.addEventListener('click', () => this.nextSlide());
+        }
+
+        this.addEventListener('mouseenter', () => {
+          if (this.autoplay) {
+            this.pauseAutoplay();
+          }
+        });
+
+        this.addEventListener('mouseleave', () => {
+          if (this.autoplay && this.isPaused) {
+            this.resumeAutoplay();
+          }
+        });
+
+        this.slidesContainer.addEventListener('touchstart', (e) => {
+          this.touchStartX = e.changedTouches[0].screenX;
+        });
+
+        this.slidesContainer.addEventListener('touchend', (e) => {
+          this.touchEndX = e.changedTouches[0].screenX;
+          this.handleSwipe();
+        });
+      }
+
+      handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = this.touchStartX - this.touchEndX;
+
+        if (Math.abs(diff) > swipeThreshold) {
+          if (diff > 0) {
+            this.nextSlide();
+          } else {
+            this.previousSlide();
+          }
+        }
+      }
+
+      showSlide(index) {
+        this.slides.forEach((slide, i) => {
+          if (i === index) {
+            slide.classList.add('active');
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        this.images.forEach((image, i) => {
+          if (i === index) {
+            image.classList.add('active');
+          } else {
+            image.classList.remove('active');
+          }
+        });
+
+        this.currentSlide = index;
+        this.resetProgress();
+      }
+
+      nextSlide() {
+        const nextIndex = (this.currentSlide + 1) % this.totalSlides;
+        this.showSlide(nextIndex);
+      }
+
+      previousSlide() {
+        const prevIndex = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+        this.showSlide(prevIndex);
+      }
+
+      startAutoplay() {
+        this.autoplayInterval = setInterval(() => {
+          this.nextSlide();
+        }, this.interval);
+        this.startProgress();
+      }
+
+      pauseAutoplay() {
+        this.isPaused = true;
+        clearInterval(this.autoplayInterval);
+        clearInterval(this.progressInterval);
+      }
+
+      resumeAutoplay() {
+        this.isPaused = false;
+        this.startAutoplay();
+      }
+
+      startProgress() {
+        let progress = 0;
+        const step = 100 / (this.interval / 100);
+        
+        this.progressInterval = setInterval(() => {
+          progress += step;
+          if (this.progressBar) {
+            this.progressBar.style.width = progress + '%';
+          }
+          if (progress >= 100) {
+            progress = 0;
+          }
+        }, 100);
+      }
+
+      resetProgress() {
+        if (this.progressBar) {
+          this.progressBar.style.width = '0%';
+        }
+        clearInterval(this.progressInterval);
+        if (this.autoplay && !this.isPaused) {
+          this.startProgress();
+        }
+      }
+
+      disconnectedCallback() {
+        clearInterval(this.autoplayInterval);
+        clearInterval(this.progressInterval);
+      }
+    }
+
+    customElements.define('editorial-carousel-{{ ai_gen_id }}', EditorialCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Editorial carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 45,
+      "max": 60,
+      "step": 1,
+      "unit": "%",
+      "label": "Image width (desktop)",
+      "default": 52
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "min": 400,
+      "max": 900,
+      "step": 50,
+      "unit": "px",
+      "label": "Section height (desktop)",
+      "default": 650
+    },
+    {
+      "type": "range",
+      "id": "mobile_image_height",
+      "min": 250,
+      "max": 600,
+      "step": 50,
+      "unit": "px",
+      "label": "Image height (mobile)",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "rotation_interval",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Rotation interval",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Slide 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "slide_1_label",
+      "label": "Label",
+      "default": "New Collection"
+    },
+    {
+      "type": "text",
+      "id": "slide_1_headline",
+      "label": "Headline",
+      "default": "Timeless Elegance"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_1_description",
+      "label": "Description",
+      "default": "Discover our curated selection of premium pieces designed for the modern lifestyle."
+    },
+    {
+      "type": "checkbox",
+      "id": "slide_1_show_cta",
+      "label": "Show call to action",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "slide_1_cta_text",
+      "label": "Call to action text",
+      "default": "Explore Collection"
+    },
+    {
+      "type": "url",
+      "id": "slide_1_cta_url",
+      "label": "Call to action link"
+    },
+    {
+      "type": "header",
+      "content": "Slide 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "slide_2_label",
+      "label": "Label",
+      "default": "Featured"
+    },
+    {
+      "type": "text",
+      "id": "slide_2_headline",
+      "label": "Headline",
+      "default": "Crafted Excellence"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_2_description",
+      "label": "Description",
+      "default": "Each piece is meticulously crafted with attention to detail and quality materials."
+    },
+    {
+      "type": "checkbox",
+      "id": "slide_2_show_cta",
+      "label": "Show call to action",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "slide_2_cta_text",
+      "label": "Call to action text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "slide_2_cta_url",
+      "label": "Call to action link"
+    },
+    {
+      "type": "header",
+      "content": "Slide 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "slide_3_label",
+      "label": "Label",
+      "default": "Limited Edition"
+    },
+    {
+      "type": "text",
+      "id": "slide_3_headline",
+      "label": "Headline",
+      "default": "Exclusive Designs"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_3_description",
+      "label": "Description",
+      "default": "Limited quantities available. Elevate your wardrobe with these unique statement pieces."
+    },
+    {
+      "type": "checkbox",
+      "id": "slide_3_show_cta",
+      "label": "Show call to action",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "slide_3_cta_text",
+      "label": "Call to action text",
+      "default": "View Details"
+    },
+    {
+      "type": "url",
+      "id": "slide_3_cta_url",
+      "label": "Call to action link"
+    },
+    {
+      "type": "header",
+      "content": "Slide 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "slide_4_label",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "slide_4_headline",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_4_description",
+      "label": "Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "slide_4_show_cta",
+      "label": "Show call to action",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "slide_4_cta_text",
+      "label": "Call to action text"
+    },
+    {
+      "type": "url",
+      "id": "slide_4_cta_url",
+      "label": "Call to action link"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Headline",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "cta_color",
+      "label": "Call to action",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Arrow",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "arrow_hover_bg",
+      "label": "Arrow hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "arrow_hover_color",
+      "label": "Arrow hover",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "progress_bg",
+      "label": "Progress background",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "color",
+      "id": "progress_color",
+      "label": "Progress bar",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Label size",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "headline_size",
+      "min": 24,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Headline size",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "cta_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Call to action size",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial carousel"
+    }
+  ]
+}
+{% endschema %}

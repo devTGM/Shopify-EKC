@@ -1,0 +1,950 @@
+{% doc %}
+  @prompt
+    Design a New Collection / Category Highlight section for a luxury fashion e-commerce website.
+    
+    Layout & Structure:
+    
+    Section starts with a small uppercase label at the top (e.g. “NEW COLLECTION”)
+    
+    Followed by a large editorial headline with one emphasized word in italics (serif font)
+    
+    One short paragraph below explaining the collection philosophy in a calm, premium tone
+    
+    Below the text, display 3 equal-width category cards in a horizontal row (desktop) and stacked or swipeable cards on mobile.
+    
+    Each card should include:
+    
+    Soft neutral background (beige / taupe / muted stone)
+    
+    Small uppercase tag at top: “ECO-FRIENDLY” (or similar)
+    
+    Centered product image (cut-out or minimal shadow)
+    
+    Large serif category title (e.g. TOPS, FLARES, BIKINIS)
+    
+    Thin underline beneath category title
+    
+    Short supporting line of text (1 line only)
+    
+    Hover & Interaction:
+    
+    On hover (desktop):
+    
+    Subtle background darken or lighten
+    
+    Category title underline animates in
+    
+    Cursor becomes pointer
+    
+    Entire card is clickable
+    
+    Typography:
+    
+    Headline: Editorial serif
+    
+    Body + labels: Clean sans-serif
+    
+    Strong spacing, breathable margins
+    
+    Responsive Behaviour:
+    
+    Desktop: 3 cards in a row
+    
+    Tablet: 2 cards + swipe
+    
+    Mobile: 1 card per view with swipe gesture
+    
+    Text remains centered and readable without truncation
+    
+    Overall Feel:
+    
+    Premium, modern, fashion-editorial
+    
+    Minimal, confident, not salesy
+    , I need 4 Cards on Desktop, Make it mobile friendly as I need cards horizontal in mobile view, Optimise the cards for mobile, Need Only one card at a moment in mobile, I need option to put image of my choice, Need dots at the bottom , Need very subtle dots , not like these, NEED CONTROL TO CONTROL THE SIZE OF THE CARD
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-highlight-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_top }}px 20px {{ block.settings.section_padding_bottom }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-collection-highlight__container-{{ ai_gen_id }} {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .ai-collection-highlight__header-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: {{ block.settings.header_spacing }}px;
+  }
+
+  .ai-collection-highlight__label-{{ ai_gen_id }} {
+    font-family: {{ block.settings.type_body_font.family }}, sans-serif;
+    font-size: {{ block.settings.label_size }}px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: {{ block.settings.label_color }};
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+
+  .ai-collection-highlight__headline-{{ ai_gen_id }} {
+    font-family: Georgia, serif;
+    font-size: {{ block.settings.headline_size }}px;
+    line-height: 1.2;
+    color: {{ block.settings.headline_color }};
+    margin-bottom: 24px;
+    font-weight: 400;
+  }
+
+  .ai-collection-highlight__headline-{{ ai_gen_id }} em {
+    font-style: italic;
+  }
+
+  .ai-collection-highlight__description-{{ ai_gen_id }} {
+    font-family: {{ block.settings.type_body_font.family }}, sans-serif;
+    font-size: {{ block.settings.description_size }}px;
+    line-height: 1.6;
+    color: {{ block.settings.description_color }};
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .ai-collection-highlight__cards-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: {{ block.settings.card_gap }}px;
+    margin-top: {{ block.settings.cards_spacing }}px;
+  }
+
+  .ai-collection-highlight__card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    padding: {{ block.settings.card_padding }}px;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+  }
+
+  .ai-collection-highlight__card-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.card_hover_background }};
+  }
+
+  .ai-collection-highlight__card-tag-{{ ai_gen_id }} {
+    font-family: {{ block.settings.type_body_font.family }}, sans-serif;
+    font-size: {{ block.settings.tag_size }}px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: {{ block.settings.tag_color }};
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .ai-collection-highlight__card-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: {{ block.settings.card_image_max_width }}px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .ai-collection-highlight__card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ai-collection-highlight__card-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-highlight__card-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-highlight__card-title-{{ ai_gen_id }} {
+    font-family: Georgia, serif;
+    font-size: {{ block.settings.card_title_size }}px;
+    letter-spacing: 0.05em;
+    color: {{ block.settings.card_title_color }};
+    margin-bottom: 12px;
+    font-weight: 400;
+    position: relative;
+    display: inline-block;
+  }
+
+  .ai-collection-highlight__card-title-underline-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: {{ block.settings.card_title_color }};
+    transition: width 0.4s ease;
+  }
+
+  .ai-collection-highlight__card-{{ ai_gen_id }}:hover .ai-collection-highlight__card-title-underline-{{ ai_gen_id }} {
+    width: 100%;
+  }
+
+  .ai-collection-highlight__card-text-{{ ai_gen_id }} {
+    font-family: {{ block.settings.type_body_font.family }}, sans-serif;
+    font-size: {{ block.settings.card_text_size }}px;
+    line-height: 1.5;
+    color: {{ block.settings.card_text_color }};
+    margin-top: 16px;
+  }
+
+  .ai-collection-highlight__dots-{{ ai_gen_id }} {
+    display: none;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-collection-highlight__cards-{{ ai_gen_id }} {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ai-collection-highlight__headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_size | times: 0.7 }}px;
+    }
+
+    .ai-collection-highlight__card-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.card_title_size | times: 0.8 }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-highlight-{{ ai_gen_id }} {
+      padding: {{ block.settings.section_padding_top | times: 0.6 }}px 0 {{ block.settings.section_padding_bottom | times: 0.6 }}px;
+    }
+
+    .ai-collection-highlight__container-{{ ai_gen_id }} {
+      padding: 0 16px;
+    }
+
+    .ai-collection-highlight__header-{{ ai_gen_id }} {
+      margin-bottom: {{ block.settings.header_spacing | times: 0.7 }}px;
+    }
+
+    .ai-collection-highlight__label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_size | times: 0.9 }}px;
+      margin-bottom: 12px;
+    }
+
+    .ai-collection-highlight__cards-wrapper-{{ ai_gen_id }} {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin: 0 -16px;
+      padding: 0 16px 0 16px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .ai-collection-highlight__cards-wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ai-collection-highlight__cards-{{ ai_gen_id }} {
+      display: flex;
+      gap: {{ block.settings.card_gap | times: 0.6 }}px;
+      margin-top: {{ block.settings.cards_spacing | times: 0.7 }}px;
+    }
+
+    .ai-collection-highlight__card-{{ ai_gen_id }} {
+      min-width: {{ block.settings.mobile_card_width }}%;
+      max-width: {{ block.settings.mobile_card_width }}%;
+      flex-shrink: 0;
+      padding: {{ block.settings.card_padding | times: 0.7 }}px;
+      scroll-snap-align: center;
+    }
+
+    .ai-collection-highlight__headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_size | times: 0.5 }}px;
+      margin-bottom: 16px;
+    }
+
+    .ai-collection-highlight__description-{{ ai_gen_id }} {
+      font-size: {{ block.settings.description_size | times: 0.9 }}px;
+    }
+
+    .ai-collection-highlight__card-tag-{{ ai_gen_id }} {
+      font-size: {{ block.settings.tag_size | times: 0.9 }}px;
+      margin-bottom: 16px;
+    }
+
+    .ai-collection-highlight__card-image-wrapper-{{ ai_gen_id }} {
+      margin-bottom: 20px;
+    }
+
+    .ai-collection-highlight__card-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.card_title_size | times: 0.7 }}px;
+    }
+
+    .ai-collection-highlight__card-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.card_text_size | times: 0.9 }}px;
+      margin-top: 12px;
+    }
+
+    .ai-collection-highlight__dots-{{ ai_gen_id }} {
+      display: flex;
+      justify-content: center;
+      gap: {{ block.settings.dots_gap }}px;
+      margin-top: {{ block.settings.dots_spacing }}px;
+      padding: 0 16px;
+    }
+
+    .ai-collection-highlight__dot-{{ ai_gen_id }} {
+      width: {{ block.settings.dot_size }}px;
+      height: {{ block.settings.dot_size }}px;
+      border-radius: 50%;
+      background-color: {{ block.settings.dot_inactive_color }};
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      opacity: {{ block.settings.dot_opacity | divided_by: 100.0 }};
+    }
+
+    .ai-collection-highlight__dot-{{ ai_gen_id }}.active {
+      background-color: {{ block.settings.dot_active_color }};
+      opacity: 1;
+    }
+  }
+{% endstyle %}
+
+<collection-highlight-{{ ai_gen_id }} class="ai-collection-highlight-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-collection-highlight__container-{{ ai_gen_id }}">
+    <div class="ai-collection-highlight__header-{{ ai_gen_id }}">
+      {% if block.settings.label != blank %}
+        <div class="ai-collection-highlight__label-{{ ai_gen_id }}">
+          {{ block.settings.label }}
+        </div>
+      {% endif %}
+
+      {% if block.settings.headline != blank %}
+        <h2 class="ai-collection-highlight__headline-{{ ai_gen_id }}">
+          {{ block.settings.headline }}
+        </h2>
+      {% endif %}
+
+      {% if block.settings.description != blank %}
+        <div class="ai-collection-highlight__description-{{ ai_gen_id }}">
+          {{ block.settings.description }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="ai-collection-highlight__cards-wrapper-{{ ai_gen_id }}" data-carousel>
+      <div class="ai-collection-highlight__cards-{{ ai_gen_id }}">
+        {% for i in (1..4) %}
+          {% liquid
+            assign image_key = 'card_' | append: i | append: '_image'
+            assign url_key = 'card_' | append: i | append: '_url'
+            assign tag_key = 'card_' | append: i | append: '_tag'
+            assign title_key = 'card_' | append: i | append: '_title'
+            assign text_key = 'card_' | append: i | append: '_text'
+            
+            assign card_image = block.settings[image_key]
+            assign card_url = block.settings[url_key]
+            assign tag = block.settings[tag_key]
+            assign title = block.settings[title_key]
+            assign text = block.settings[text_key]
+          %}
+
+          {% if card_url != blank %}
+            <a href="{{ card_url }}" class="ai-collection-highlight__card-{{ ai_gen_id }}" data-card-index="{{ forloop.index0 }}">
+              {% if tag != blank %}
+                <div class="ai-collection-highlight__card-tag-{{ ai_gen_id }}">
+                  {{ tag }}
+                </div>
+              {% endif %}
+
+              <div class="ai-collection-highlight__card-image-wrapper-{{ ai_gen_id }}">
+                {% if card_image %}
+                  <img
+                    src="{{ card_image | image_url: width: 600 }}"
+                    alt="{{ card_image.alt | escape }}"
+                    class="ai-collection-highlight__card-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-collection-highlight__card-placeholder-{{ ai_gen_id }}">
+                    {{ 'product-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+
+              {% if title != blank %}
+                <div class="ai-collection-highlight__card-title-{{ ai_gen_id }}">
+                  {{ title }}
+                  <span class="ai-collection-highlight__card-title-underline-{{ ai_gen_id }}"></span>
+                </div>
+              {% endif %}
+
+              {% if text != blank %}
+                <div class="ai-collection-highlight__card-text-{{ ai_gen_id }}">
+                  {{ text }}
+                </div>
+              {% endif %}
+            </a>
+          {% else %}
+            <div class="ai-collection-highlight__card-{{ ai_gen_id }}" data-card-index="{{ forloop.index0 }}">
+              {% if tag != blank %}
+                <div class="ai-collection-highlight__card-tag-{{ ai_gen_id }}">
+                  {{ tag }}
+                </div>
+              {% endif %}
+
+              <div class="ai-collection-highlight__card-image-wrapper-{{ ai_gen_id }}">
+                {% if card_image %}
+                  <img
+                    src="{{ card_image | image_url: width: 600 }}"
+                    alt="{{ card_image.alt | escape }}"
+                    class="ai-collection-highlight__card-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-collection-highlight__card-placeholder-{{ ai_gen_id }}">
+                    {{ 'product-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+
+              {% if title != blank %}
+                <div class="ai-collection-highlight__card-title-{{ ai_gen_id }}">
+                  {{ title }}
+                  <span class="ai-collection-highlight__card-title-underline-{{ ai_gen_id }}"></span>
+                </div>
+              {% endif %}
+
+              {% if text != blank %}
+                <div class="ai-collection-highlight__card-text-{{ ai_gen_id }}">
+                  {{ text }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="ai-collection-highlight__dots-{{ ai_gen_id }}" data-dots>
+      {% for i in (1..4) %}
+        <button 
+          class="ai-collection-highlight__dot-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}" 
+          data-dot-index="{{ forloop.index0 }}"
+          aria-label="Go to slide {{ forloop.index }}"
+        ></button>
+      {% endfor %}
+    </div>
+  </div>
+</collection-highlight-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionHighlight{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.carousel = this.querySelector('[data-carousel]');
+        this.dots = this.querySelectorAll('[data-dot-index]');
+        this.cards = this.querySelectorAll('[data-card-index]');
+
+        if (!this.carousel || this.dots.length === 0) return;
+
+        this.setupDots();
+        this.setupScrollListener();
+      }
+
+      setupDots() {
+        this.dots.forEach((dot) => {
+          dot.addEventListener('click', () => {
+            const index = parseInt(dot.getAttribute('data-dot-index'));
+            this.scrollToCard(index);
+          });
+        });
+      }
+
+      setupScrollListener() {
+        let scrollTimeout;
+        this.carousel.addEventListener('scroll', () => {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            this.updateActiveDot();
+          }, 100);
+        });
+      }
+
+      scrollToCard(index) {
+        const card = this.cards[index];
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }
+
+      updateActiveDot() {
+        const scrollLeft = this.carousel.scrollLeft;
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = parseInt(getComputedStyle(this.carousel.querySelector('.ai-collection-highlight__cards-{{ ai_gen_id }}')).gap);
+        const activeIndex = Math.round(scrollLeft / (cardWidth + gap));
+
+        this.dots.forEach((dot, index) => {
+          if (index === activeIndex) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+    }
+
+    customElements.define('collection-highlight-{{ ai_gen_id }}', CollectionHighlight{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection highlight",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "NEW COLLECTION"
+    },
+    {
+      "type": "richtext",
+      "id": "headline",
+      "label": "Headline",
+      "default": "<p>Discover Our <em>Signature</em> Collection</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Crafted with intention, designed for those who value timeless elegance and conscious choices.</p>"
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Header spacing",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "card_1_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "card_1_tag",
+      "label": "Tag",
+      "default": "ECO-FRIENDLY"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Title",
+      "default": "TOPS"
+    },
+    {
+      "type": "text",
+      "id": "card_1_text",
+      "label": "Supporting text",
+      "default": "Elevated essentials for every occasion"
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "card_2_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "card_2_tag",
+      "label": "Tag",
+      "default": "SUSTAINABLE"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Title",
+      "default": "FLARES"
+    },
+    {
+      "type": "text",
+      "id": "card_2_text",
+      "label": "Supporting text",
+      "default": "Timeless silhouettes, modern comfort"
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "card_3_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "card_3_tag",
+      "label": "Tag",
+      "default": "PREMIUM"
+    },
+    {
+      "type": "text",
+      "id": "card_3_title",
+      "label": "Title",
+      "default": "BIKINIS"
+    },
+    {
+      "type": "text",
+      "id": "card_3_text",
+      "label": "Supporting text",
+      "default": "Designed for confidence and grace"
+    },
+    {
+      "type": "header",
+      "content": "Card 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "card_4_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "card_4_tag",
+      "label": "Tag",
+      "default": "LUXURY"
+    },
+    {
+      "type": "text",
+      "id": "card_4_title",
+      "label": "Title",
+      "default": "ACCESSORIES"
+    },
+    {
+      "type": "text",
+      "id": "card_4_text",
+      "label": "Supporting text",
+      "default": "The perfect finishing touch"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "cards_spacing",
+      "label": "Cards spacing from header",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_image_max_width",
+      "label": "Card image max width",
+      "min": 100,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 300
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "label": "Mobile card width",
+      "min": 70,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "header",
+      "content": "Mobile dots"
+    },
+    {
+      "type": "range",
+      "id": "dots_spacing",
+      "label": "Spacing from cards",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "dots_gap",
+      "label": "Gap between dots",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "dot_opacity",
+      "label": "Inactive dot opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "Active dot color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "dot_inactive_color",
+      "label": "Inactive dot color",
+      "default": "#999999"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Headline",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#f5f0eb"
+    },
+    {
+      "type": "color",
+      "id": "card_hover_background",
+      "label": "Card hover background",
+      "default": "#ebe5df"
+    },
+    {
+      "type": "color",
+      "id": "tag_color",
+      "label": "Card tag",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "card_title_color",
+      "label": "Card title",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card text",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Label size",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 11
+    },
+    {
+      "type": "range",
+      "id": "headline_size",
+      "label": "Headline size",
+      "min": 24,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Description size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "tag_size",
+      "label": "Card tag size",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "label": "Card title size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "card_text_size",
+      "label": "Card text size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection highlight"
+    }
+  ],
+  "tag": null
+}
+{% endschema %}

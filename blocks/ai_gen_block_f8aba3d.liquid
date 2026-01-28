@@ -1,0 +1,738 @@
+{% doc %}
+  @prompt
+    Design a luxury “Latest Arrivals” product showcase section for a fashion or lifestyle e-commerce website.
+    
+    Layout & structure:
+    – Section title aligned left: “Our Latest Arrivals”
+    – Two minimal text tabs aligned right: “New Arrivals” (active) and “Best Sellers” (inactive)
+    – Horizontal product grid with 4 product cards visible on desktop
+    – Each product card includes a full-height lifestyle image on a neutral background
+    
+    Product card details:
+    – Product name below image
+    – Price displayed clearly under product name
+    – Small color swatches shown beneath price
+    – Optional small “New” tag on the top corner of one card
+    – No ratings, no reviews, no discount badges
+    
+    Interaction & hover behavior:
+    – On hover, product image subtly elevates or softens
+    – Color swatches highlight smoothly on hover
+    – No aggressive zoom or motion
+    – Smooth transitions (150–250ms ease-in-out)
+    
+    Tabs behavior:
+    – Clicking “New Arrivals” or “Best Sellers” filters products dynamically
+    – Active tab has a thin underline or darker text
+    – No heavy animation between tab switches
+    
+    Style & tone:
+    – Editorial, fashion-forward, premium
+    – Clean typography with strong hierarchy
+    – Plenty of white space
+    – Soft neutral backgrounds
+    – Designed to feel like a high-end fashion lookbook, not a marketplace
+    
+    UX rules:
+    – Entire product card is clickable
+    – Interactions should feel calm and intentional
+    – Avoid clutter, urgency, or promotional language,  I want to have an option to keep my tabs center aligned, I want center aligned option for mobile vierw as well
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-latest-arrivals-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_top }}px 0 {{ block.settings.section_padding_bottom }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-latest-arrivals__container-{{ ai_gen_id }} {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .ai-latest-arrivals__header-{{ ai_gen_id }} {
+    display: flex;
+    {% if block.settings.tab_alignment == 'center' %}
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    {% else %}
+      justify-content: space-between;
+      align-items: center;
+    {% endif %}
+    margin-bottom: {{ block.settings.header_spacing }}px;
+    gap: 20px;
+  }
+
+  .ai-latest-arrivals__title-{{ ai_gen_id }} {
+    margin: 0;
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+
+  .ai-latest-arrivals__tabs-{{ ai_gen_id }} {
+    display: flex;
+    gap: 32px;
+  }
+
+  .ai-latest-arrivals__tab-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    padding: 0 0 8px 0;
+    font-size: {{ block.settings.tab_size }}px;
+    color: {{ block.settings.tab_color }};
+    cursor: pointer;
+    position: relative;
+    transition: color 200ms ease-in-out;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .ai-latest-arrivals__tab-{{ ai_gen_id }}::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: {{ block.settings.tab_active_color }};
+    transform: scaleX(0);
+    transition: transform 200ms ease-in-out;
+  }
+
+  .ai-latest-arrivals__tab-{{ ai_gen_id }}.active {
+    color: {{ block.settings.tab_active_color }};
+  }
+
+  .ai-latest-arrivals__tab-{{ ai_gen_id }}.active::after {
+    transform: scaleX(1);
+  }
+
+  .ai-latest-arrivals__tab-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.tab_active_color }};
+  }
+
+  .ai-latest-arrivals__grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: {{ block.settings.grid_gap }}px;
+  }
+
+  .ai-latest-arrivals__product-{{ ai_gen_id }} {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 200ms ease-in-out;
+  }
+
+  .ai-latest-arrivals__product-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+  }
+
+  .ai-latest-arrivals__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: {{ block.settings.image_aspect_ratio }};
+    overflow: hidden;
+    background-color: {{ block.settings.image_background }};
+    margin-bottom: {{ block.settings.content_spacing }}px;
+  }
+
+  .ai-latest-arrivals__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 200ms ease-in-out;
+  }
+
+  .ai-latest-arrivals__product-{{ ai_gen_id }}:hover .ai-latest-arrivals__image-{{ ai_gen_id }} {
+    opacity: 0.9;
+  }
+
+  .ai-latest-arrivals__badge-{{ ai_gen_id }} {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 12px;
+    background-color: {{ block.settings.badge_background }};
+    color: {{ block.settings.badge_text_color }};
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .ai-latest-arrivals__product-info-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ai-latest-arrivals__product-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.product_title_size }}px;
+    color: {{ block.settings.product_title_color }};
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+  }
+
+  .ai-latest-arrivals__price-{{ ai_gen_id }} {
+    font-size: {{ block.settings.price_size }}px;
+    color: {{ block.settings.price_color }};
+    font-weight: 400;
+  }
+
+  .ai-latest-arrivals__swatches-{{ ai_gen_id }} {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .ai-latest-arrivals__swatch-{{ ai_gen_id }} {
+    width: {{ block.settings.swatch_size }}px;
+    height: {{ block.settings.swatch_size }}px;
+    border-radius: 50%;
+    border: 1px solid {{ block.settings.swatch_border_color }};
+    cursor: pointer;
+    transition: transform 150ms ease-in-out, box-shadow 150ms ease-in-out;
+  }
+
+  .ai-latest-arrivals__swatch-{{ ai_gen_id }}:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-latest-arrivals__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: {{ block.settings.image_background }};
+  }
+
+  .ai-latest-arrivals__placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-latest-arrivals__empty-state-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 60px 20px;
+    color: {{ block.settings.tab_color }};
+    font-size: 14px;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-latest-arrivals__grid-{{ ai_gen_id }} {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ai-latest-arrivals__container-{{ ai_gen_id }} {
+      padding: 0 24px;
+    }
+
+    .ai-latest-arrivals__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-latest-arrivals__grid-{{ ai_gen_id }} {
+      grid-template-columns: repeat(2, 1fr);
+      gap: {{ block.settings.grid_gap | times: 0.7 }}px;
+    }
+
+    .ai-latest-arrivals__header-{{ ai_gen_id }} {
+      {% if block.settings.mobile_tab_alignment == 'center' %}
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      {% else %}
+        flex-direction: column;
+        align-items: flex-start;
+      {% endif %}
+      gap: 16px;
+    }
+
+    .ai-latest-arrivals__tabs-{{ ai_gen_id }} {
+      gap: 24px;
+    }
+
+    .ai-latest-arrivals__container-{{ ai_gen_id }} {
+      padding: 0 16px;
+    }
+
+    .ai-latest-arrivals__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.7 }}px;
+    }
+
+    .ai-latest-arrivals__tab-{{ ai_gen_id }} {
+      font-size: {{ block.settings.tab_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<latest-arrivals-{{ ai_gen_id }} class="ai-latest-arrivals-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-latest-arrivals__container-{{ ai_gen_id }}">
+    <div class="ai-latest-arrivals__header-{{ ai_gen_id }}">
+      <h2 class="ai-latest-arrivals__title-{{ ai_gen_id }}">{{ block.settings.section_title }}</h2>
+      <div class="ai-latest-arrivals__tabs-{{ ai_gen_id }}">
+        <button 
+          class="ai-latest-arrivals__tab-{{ ai_gen_id }} active" 
+          data-tab="new-arrivals"
+          aria-pressed="true"
+        >
+          {{ block.settings.tab_new_arrivals }}
+        </button>
+        <button 
+          class="ai-latest-arrivals__tab-{{ ai_gen_id }}" 
+          data-tab="best-sellers"
+          aria-pressed="false"
+        >
+          {{ block.settings.tab_best_sellers }}
+        </button>
+      </div>
+    </div>
+
+    <div class="ai-latest-arrivals__grid-{{ ai_gen_id }}" data-products-container>
+      {% liquid
+        assign new_arrivals = block.settings.new_arrivals_products
+        assign best_sellers = block.settings.best_sellers_products
+        assign active_products = new_arrivals
+      %}
+
+      {% if active_products.count > 0 %}
+        {% for product in active_products limit: 4 %}
+          <a 
+            href="{{ product.url }}" 
+            class="ai-latest-arrivals__product-{{ ai_gen_id }}"
+            data-product-type="new-arrivals"
+          >
+            <div class="ai-latest-arrivals__image-wrapper-{{ ai_gen_id }}">
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | image_url: width: 800 }}"
+                  alt="{{ product.featured_image.alt | escape }}"
+                  class="ai-latest-arrivals__image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="800"
+                  height="{{ 800 | divided_by: block.settings.image_aspect_ratio }}"
+                >
+              {% else %}
+                <div class="ai-latest-arrivals__placeholder-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+              
+              {% if block.settings.show_new_badge and forloop.index == 1 %}
+                <span class="ai-latest-arrivals__badge-{{ ai_gen_id }}">{{ block.settings.badge_text }}</span>
+              {% endif %}
+            </div>
+
+            <div class="ai-latest-arrivals__product-info-{{ ai_gen_id }}">
+              <h3 class="ai-latest-arrivals__product-title-{{ ai_gen_id }}">{{ product.title }}</h3>
+              <div class="ai-latest-arrivals__price-{{ ai_gen_id }}">
+                {{ product.price | money }}
+              </div>
+
+              {% if block.settings.show_color_swatches and product.options_with_values.size > 0 %}
+                {% for option in product.options_with_values %}
+                  {% if option.name == 'Color' or option.name == 'Colour' %}
+                    <div class="ai-latest-arrivals__swatches-{{ ai_gen_id }}">
+                      {% for value in option.values limit: 4 %}
+                        {% assign color_value = value | downcase | replace: ' ', '-' %}
+                        <span 
+                          class="ai-latest-arrivals__swatch-{{ ai_gen_id }}"
+                          style="background-color: {{ value | handle }};"
+                          title="{{ value }}"
+                        ></span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="ai-latest-arrivals__empty-state-{{ ai_gen_id }}" style="grid-column: 1 / -1;">
+          Next, add products to showcase in this collection
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</latest-arrivals-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class LatestArrivals{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.tabs = this.querySelectorAll('.ai-latest-arrivals__tab-{{ ai_gen_id }}');
+        this.productsContainer = this.querySelector('[data-products-container]');
+        
+        this.newArrivals = {{ block.settings.new_arrivals_products | json }};
+        this.bestSellers = {{ block.settings.best_sellers_products | json }};
+      }
+
+      connectedCallback() {
+        this.setupTabs();
+      }
+
+      setupTabs() {
+        this.tabs.forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            const tabType = e.target.dataset.tab;
+            
+            this.tabs.forEach(t => {
+              t.classList.remove('active');
+              t.setAttribute('aria-pressed', 'false');
+            });
+            
+            e.target.classList.add('active');
+            e.target.setAttribute('aria-pressed', 'true');
+            
+            this.filterProducts(tabType);
+          });
+        });
+      }
+
+      filterProducts(tabType) {
+        const products = this.productsContainer.querySelectorAll('.ai-latest-arrivals__product-{{ ai_gen_id }}');
+        
+        products.forEach(product => {
+          const productType = product.dataset.productType;
+          
+          if (productType === tabType) {
+            product.style.display = 'block';
+          } else {
+            product.style.display = 'none';
+          }
+        });
+      }
+    }
+
+    customElements.define('latest-arrivals-{{ ai_gen_id }}', LatestArrivals{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Latest arrivals",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "section_title",
+      "label": "Title",
+      "default": "Our Latest Arrivals"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Size",
+      "default": 36
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "min": 20,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Spacing below header",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Tabs"
+    },
+    {
+      "type": "select",
+      "id": "tab_alignment",
+      "label": "Desktop alignment",
+      "options": [
+        {
+          "value": "split",
+          "label": "Split (title left, tabs right)"
+        },
+        {
+          "value": "center",
+          "label": "Center (stacked)"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "select",
+      "id": "mobile_tab_alignment",
+      "label": "Mobile alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_new_arrivals",
+      "label": "New arrivals label",
+      "default": "New Arrivals"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_best_sellers",
+      "label": "Best sellers label",
+      "default": "Best Sellers"
+    },
+    {
+      "type": "range",
+      "id": "tab_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "tab_color",
+      "label": "Inactive color",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_color",
+      "label": "Active color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "product_list",
+      "id": "new_arrivals_products",
+      "label": "New arrivals",
+      "limit": 8
+    },
+    {
+      "type": "product_list",
+      "id": "best_sellers_products",
+      "label": "Best sellers",
+      "limit": 8
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 16,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Gap between products",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "content_spacing",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Image to content spacing",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Product images"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        {
+          "value": "0.75",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "1.33",
+          "label": "Landscape (4:3)"
+        }
+      ],
+      "default": "1.33"
+    },
+    {
+      "type": "color",
+      "id": "image_background",
+      "label": "Background",
+      "default": "#F5F5F5"
+    },
+    {
+      "type": "header",
+      "content": "Product details"
+    },
+    {
+      "type": "range",
+      "id": "product_title_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Title size",
+      "default": 15
+    },
+    {
+      "type": "color",
+      "id": "product_title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "price_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Price size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_new_badge",
+      "label": "Show badge on first product",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "badge_text",
+      "label": "Badge text",
+      "default": "New"
+    },
+    {
+      "type": "color",
+      "id": "badge_background",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Color swatches"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_color_swatches",
+      "label": "Show color swatches",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "swatch_size",
+      "min": 12,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "label": "Swatch size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "swatch_border_color",
+      "label": "Border color",
+      "default": "#E0E0E0"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Latest arrivals"
+    }
+  ]
+}
+{% endschema %}

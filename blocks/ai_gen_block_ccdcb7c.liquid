@@ -1,0 +1,608 @@
+{% doc %}
+  @prompt
+    An interactive vertical Image with text where The image has the scroll effect wher the previous images stack behing the current image and each image has their respective text and CTA on their left
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-stack-scroll-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    position: relative;
+    padding: 60px 0;
+  }
+
+  .ai-stack-scroll-container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .ai-stack-scroll-item-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+
+  .ai-stack-scroll-content-{{ ai_gen_id }} {
+    z-index: 2;
+    position: relative;
+  }
+
+  .ai-stack-scroll-eyebrow-{{ ai_gen_id }} {
+    font-size: {{ block.settings.eyebrow_size }}px;
+    color: {{ block.settings.eyebrow_color }};
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ai-stack-scroll-heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .ai-stack-scroll-text-{{ ai_gen_id }} {
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+
+  .ai-stack-scroll-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 14px 32px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_radius }}px;
+    font-size: {{ block.settings.button_text_size }}px;
+    transition: all 0.3s ease;
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+  }
+
+  .ai-stack-scroll-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  .ai-stack-scroll-image-wrapper-{{ ai_gen_id }} {
+    position: sticky;
+    top: 100px;
+    height: 600px;
+    z-index: 1;
+  }
+
+  .ai-stack-scroll-image-container-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: {{ block.settings.image_radius }}px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .ai-stack-scroll-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-stack-scroll-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .ai-stack-scroll-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 300px;
+  }
+
+  .ai-stack-scroll-empty-state-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-stack-scroll-item-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      min-height: auto;
+    }
+
+    .ai-stack-scroll-image-wrapper-{{ ai_gen_id }} {
+      position: relative;
+      top: 0;
+      height: 400px;
+      order: -1;
+    }
+
+    .ai-stack-scroll-heading-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.heading_size }}px * 0.7);
+    }
+
+    .ai-stack-scroll-text-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.text_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<stack-scroll-{{ ai_gen_id }} class="ai-stack-scroll-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-stack-scroll-container-{{ ai_gen_id }}">
+    {% for i in (1..3) %}
+      {% liquid
+        assign item_enabled_key = 'item_' | append: i | append: '_enabled'
+        assign eyebrow_key = 'item_' | append: i | append: '_eyebrow'
+        assign heading_key = 'item_' | append: i | append: '_heading'
+        assign text_key = 'item_' | append: i | append: '_text'
+        assign button_text_key = 'item_' | append: i | append: '_button_text'
+        assign button_link_key = 'item_' | append: i | append: '_button_link'
+        assign image_key = 'item_' | append: i | append: '_image'
+
+        assign item_enabled = block.settings[item_enabled_key]
+        assign eyebrow = block.settings[eyebrow_key]
+        assign heading = block.settings[heading_key]
+        assign text = block.settings[text_key]
+        assign button_text = block.settings[button_text_key]
+        assign button_link = block.settings[button_link_key]
+        assign image = block.settings[image_key]
+      %}
+
+      {% if item_enabled %}
+        <div class="ai-stack-scroll-item-{{ ai_gen_id }}" data-item-index="{{ i }}">
+          <div class="ai-stack-scroll-content-{{ ai_gen_id }}">
+            {% if eyebrow != blank %}
+              <div class="ai-stack-scroll-eyebrow-{{ ai_gen_id }}">{{ eyebrow }}</div>
+            {% endif %}
+
+            {% if heading != blank %}
+              <h2 class="ai-stack-scroll-heading-{{ ai_gen_id }}">{{ heading }}</h2>
+            {% endif %}
+
+            {% if text != blank %}
+              <div class="ai-stack-scroll-text-{{ ai_gen_id }}">{{ text }}</div>
+            {% endif %}
+
+            {% if button_text != blank %}
+              <a href="{{ button_link }}" class="ai-stack-scroll-button-{{ ai_gen_id }}">
+                {{ button_text }}
+              </a>
+            {% endif %}
+          </div>
+
+          <div class="ai-stack-scroll-image-wrapper-{{ ai_gen_id }}">
+            <div class="ai-stack-scroll-image-container-{{ ai_gen_id }}" data-image-index="{{ i }}">
+              {% if image %}
+                <img
+                  src="{{ image | image_url: width: 1200 }}"
+                  alt="{{ image.alt | escape }}"
+                  loading="lazy"
+                  width="{{ image.width }}"
+                  height="{{ image.height }}"
+                  class="ai-stack-scroll-image-{{ ai_gen_id }}"
+                >
+              {% else %}
+                <div class="ai-stack-scroll-image-placeholder-{{ ai_gen_id }}">
+                  {{ 'image' | placeholder_svg_tag }}
+                  <div class="ai-stack-scroll-empty-state-{{ ai_gen_id }}">
+                    Add an image for item {{ i }}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</stack-scroll-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class StackScroll{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.items = [];
+        this.imageContainers = [];
+        this.currentIndex = 0;
+      }
+
+      connectedCallback() {
+        this.items = Array.from(this.querySelectorAll('.ai-stack-scroll-item-{{ ai_gen_id }}'));
+        this.imageContainers = Array.from(this.querySelectorAll('.ai-stack-scroll-image-container-{{ ai_gen_id }}'));
+        
+        if (this.items.length === 0) return;
+
+        this.setupStackEffect();
+        this.setupScrollListener();
+      }
+
+      setupStackEffect() {
+        this.imageContainers.forEach(function(container, index) {
+          const zIndex = 10 - index;
+          const scale = 1 - (index * 0.05);
+          const translateY = index * 20;
+          
+          container.style.zIndex = zIndex;
+          container.style.transform = 'scale(' + scale + ') translateY(' + translateY + 'px)';
+          
+          if (index > 0) {
+            container.style.opacity = '0.6';
+          }
+        });
+      }
+
+      setupScrollListener() {
+        const self = this;
+        let ticking = false;
+
+        window.addEventListener('scroll', function() {
+          if (!ticking) {
+            window.requestAnimationFrame(function() {
+              self.handleScroll();
+              ticking = false;
+            });
+            ticking = true;
+          }
+        });
+      }
+
+      handleScroll() {
+        const scrollPosition = window.scrollY;
+        const windowHeight = window.innerHeight;
+        
+        this.items.forEach(function(item, index) {
+          const rect = item.getBoundingClientRect();
+          const itemTop = rect.top + scrollPosition;
+          const itemHeight = rect.height;
+          const itemCenter = itemTop + (itemHeight / 2);
+          
+          const distanceFromCenter = Math.abs(scrollPosition + (windowHeight / 2) - itemCenter);
+          const maxDistance = windowHeight;
+          const progress = Math.max(0, 1 - (distanceFromCenter / maxDistance));
+          
+          if (progress > 0.3) {
+            this.activateImage(index);
+          }
+        }.bind(this));
+      }
+
+      activateImage(index) {
+        if (this.currentIndex === index) return;
+        
+        this.currentIndex = index;
+        
+        this.imageContainers.forEach(function(container, i) {
+          const imageIndex = parseInt(container.getAttribute('data-image-index'));
+          const itemIndex = index + 1;
+          
+          if (imageIndex === itemIndex) {
+            container.style.transform = 'scale(1) translateY(0)';
+            container.style.opacity = '1';
+            container.style.zIndex = '20';
+          } else if (imageIndex < itemIndex) {
+            const offset = (itemIndex - imageIndex) * 20;
+            const scale = 1 - ((itemIndex - imageIndex) * 0.05);
+            container.style.transform = 'scale(' + scale + ') translateY(' + offset + 'px)';
+            container.style.opacity = '0.6';
+            container.style.zIndex = String(10 - (itemIndex - imageIndex));
+          } else {
+            const reverseIndex = imageIndex - itemIndex;
+            const scale = 1 - (reverseIndex * 0.05);
+            const translateY = reverseIndex * 20;
+            container.style.transform = 'scale(' + scale + ') translateY(' + translateY + 'px)';
+            container.style.opacity = '0.6';
+            container.style.zIndex = String(10 - reverseIndex);
+          }
+        });
+      }
+    }
+
+    customElements.define('stack-scroll-{{ ai_gen_id }}', StackScroll{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Stacking scroll images",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Content style"
+    },
+    {
+      "type": "range",
+      "id": "eyebrow_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Eyebrow size",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "eyebrow_color",
+      "label": "Eyebrow color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 24,
+      "max": 72,
+      "step": 4,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 48
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Hover background",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Hover border",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Item 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_1_enabled",
+      "label": "Enable item 1",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "item_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "item_1_eyebrow",
+      "label": "Eyebrow text",
+      "default": "Feature 01"
+    },
+    {
+      "type": "text",
+      "id": "item_1_heading",
+      "label": "Heading",
+      "default": "Premium Quality"
+    },
+    {
+      "type": "textarea",
+      "id": "item_1_text",
+      "label": "Description",
+      "default": "Experience the finest craftsmanship with our premium collection designed for those who appreciate quality."
+    },
+    {
+      "type": "text",
+      "id": "item_1_button_text",
+      "label": "Button text",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "item_1_button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Item 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_2_enabled",
+      "label": "Enable item 2",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "item_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "item_2_eyebrow",
+      "label": "Eyebrow text",
+      "default": "Feature 02"
+    },
+    {
+      "type": "text",
+      "id": "item_2_heading",
+      "label": "Heading",
+      "default": "Sustainable Design"
+    },
+    {
+      "type": "textarea",
+      "id": "item_2_text",
+      "label": "Description",
+      "default": "Our commitment to sustainability means every product is crafted with care for the environment and future generations."
+    },
+    {
+      "type": "text",
+      "id": "item_2_button_text",
+      "label": "Button text",
+      "default": "Discover more"
+    },
+    {
+      "type": "url",
+      "id": "item_2_button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Item 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_3_enabled",
+      "label": "Enable item 3",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "item_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "item_3_eyebrow",
+      "label": "Eyebrow text",
+      "default": "Feature 03"
+    },
+    {
+      "type": "text",
+      "id": "item_3_heading",
+      "label": "Heading",
+      "default": "Timeless Style"
+    },
+    {
+      "type": "textarea",
+      "id": "item_3_text",
+      "label": "Description",
+      "default": "Classic designs that transcend trends, ensuring your investment remains stylish for years to come."
+    },
+    {
+      "type": "text",
+      "id": "item_3_button_text",
+      "label": "Button text",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "item_3_button_link",
+      "label": "Button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stacking scroll images"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1422 @@
+{% doc %}
+  @prompt
+    reate a premium Shopify homepage section with a split layout.
+    
+    On desktop:
+    
+    Left side displays a large, full-height featured lifestyle image showcasing a hero product.
+    
+    Right side displays a curated collection card with:
+    
+    Small section label (e.g. “Editor’s Pick” or “Favorite Picks”)
+    
+    Product or collection image
+    
+    Collection name
+    
+    Optional badge (e.g. “Loved by Customers”)
+    
+    Clear CTA button
+    
+    Carousel navigation (dots or arrows) to switch between collections
+    
+    On mobile:
+    
+    Stack content vertically with the featured image first
+    
+    Collection card appears below as a swipeable carousel
+    
+    Add smooth scroll-based or fade transitions when the active collection changes.
+    Maintain a minimal, luxury aesthetic with generous spacing and subtle hover effects.
+    Use body font for all text and ensure fast loading and accessibility.,  I need image ratio option for both collection and featured product image, I need a featured Image for every collection, I need more than 6 collections, it must have toggle button to on and off, need controls to hide arrows and dots, the featured should be different on the left side for each collection
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-split-hero-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-split-hero__container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: {{ block.settings.section_height }}vh;
+    gap: 0;
+  }
+
+  .ai-split-hero__featured-side-{{ ai_gen_id }} {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-split-hero__featured-carousel-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ai-split-hero__featured-track-{{ ai_gen_id }} {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ai-split-hero__featured-slide-{{ ai_gen_id }} {
+    min-width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .ai-split-hero__featured-slide-{{ ai_gen_id }}.active {
+    opacity: 1;
+  }
+
+  .ai-split-hero__featured-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: {{ block.settings.featured_image_position }};
+  }
+
+  .ai-split-hero__featured-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-split-hero__featured-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 400px;
+    max-height: 400px;
+  }
+
+  .ai-split-hero__collection-side-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.content_padding }}px;
+    position: relative;
+  }
+
+  .ai-split-hero__carousel-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: {{ block.settings.card_max_width }}px;
+    position: relative;
+  }
+
+  .ai-split-hero__carousel-{{ ai_gen_id }} {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-split-hero__carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ai-split-hero__slide-{{ ai_gen_id }} {
+    min-width: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .ai-split-hero__slide-{{ ai_gen_id }}.active {
+    opacity: 1;
+  }
+
+  .ai-split-hero__card-{{ ai_gen_id }} {
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-split-hero__label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_size }}px;
+    color: {{ block.settings.label_color }};
+    margin-bottom: {{ block.settings.spacing_small }}px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+  }
+
+  .ai-split-hero__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    margin-bottom: {{ block.settings.spacing_medium }}px;
+    overflow: hidden;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-split-hero__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    aspect-ratio: {{ block.settings.collection_image_ratio }};
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .ai-split-hero__card-{{ ai_gen_id }}:hover .ai-split-hero__image-{{ ai_gen_id }} {
+    transform: scale(1.05);
+  }
+
+  .ai-split-hero__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: {{ block.settings.collection_image_ratio }};
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-split-hero__image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+  }
+
+  .ai-split-hero__badge-{{ ai_gen_id }} {
+    position: absolute;
+    top: {{ block.settings.spacing_small }}px;
+    right: {{ block.settings.spacing_small }}px;
+    background-color: {{ block.settings.badge_bg_color }};
+    color: {{ block.settings.badge_text_color }};
+    padding: 8px 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: {{ block.settings.badge_border_radius }}px;
+    font-weight: 600;
+  }
+
+  .ai-split-hero__title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    margin-bottom: {{ block.settings.spacing_medium }}px;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .ai-split-hero__button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    transition: all 0.3s ease;
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+
+  .ai-split-hero__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+    transform: translateY(-2px);
+  }
+
+  .ai-split-hero__navigation-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: {{ block.settings.spacing_large }}px;
+  }
+
+  .ai-split-hero__nav-button-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: {{ block.settings.nav_color }};
+    transition: color 0.3s ease;
+    opacity: 0.6;
+  }
+
+  .ai-split-hero__nav-button-{{ ai_gen_id }}:hover {
+    opacity: 1;
+  }
+
+  .ai-split-hero__nav-button-{{ ai_gen_id }} svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  {% unless block.settings.show_arrows %}
+    .ai-split-hero__nav-button-{{ ai_gen_id }} {
+      display: none;
+    }
+  {% endunless %}
+
+  .ai-split-hero__dots-{{ ai_gen_id }} {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 200px;
+  }
+
+  {% unless block.settings.show_dots %}
+    .ai-split-hero__dots-{{ ai_gen_id }} {
+      display: none;
+    }
+  {% endunless %}
+
+  .ai-split-hero__dot-{{ ai_gen_id }} {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: {{ block.settings.nav_color }};
+    opacity: 0.3;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+  }
+
+  .ai-split-hero__dot-{{ ai_gen_id }}.active {
+    opacity: 1;
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-split-hero__container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    .ai-split-hero__featured-side-{{ ai_gen_id }} {
+      min-height: {{ block.settings.mobile_image_height }}vh;
+    }
+
+    .ai-split-hero__collection-side-{{ ai_gen_id }} {
+      padding: {{ block.settings.mobile_padding }}px;
+    }
+
+    .ai-split-hero__carousel-wrapper-{{ ai_gen_id }} {
+      max-width: 100%;
+    }
+
+    .ai-split-hero__carousel-{{ ai_gen_id }} {
+      touch-action: pan-y;
+    }
+
+    .ai-split-hero__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-split-hero__label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<premium-split-hero-{{ ai_gen_id }} class="ai-split-hero-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-split-hero__container-{{ ai_gen_id }}">
+    <div class="ai-split-hero__featured-side-{{ ai_gen_id }}">
+      <div class="ai-split-hero__featured-carousel-{{ ai_gen_id }}">
+        <div class="ai-split-hero__featured-track-{{ ai_gen_id }}">
+          {% for i in (1..10) %}
+            {% liquid
+              assign enabled_key = 'enable_collection_' | append: i
+              assign featured_image_key = 'featured_image_' | append: i
+
+              assign is_enabled = block.settings[enabled_key]
+              assign featured_image = block.settings[featured_image_key]
+            %}
+
+            {% if is_enabled %}
+              <div class="ai-split-hero__featured-slide-{{ ai_gen_id }}" data-featured-slide="{{ i }}">
+                {% if featured_image %}
+                  <img
+                    src="{{ featured_image | image_url: width: 2000 }}"
+                    alt="{{ featured_image.alt | escape }}"
+                    loading="lazy"
+                    width="{{ featured_image.width }}"
+                    height="{{ featured_image.height }}"
+                    class="ai-split-hero__featured-image-{{ ai_gen_id }}"
+                    style="aspect-ratio: {{ block.settings.featured_image_ratio }};"
+                  >
+                {% else %}
+                  <div class="ai-split-hero__featured-placeholder-{{ ai_gen_id }}">
+                    {{ 'hero-apparel-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-split-hero__collection-side-{{ ai_gen_id }}">
+      <div class="ai-split-hero__carousel-wrapper-{{ ai_gen_id }}">
+        <div class="ai-split-hero__carousel-{{ ai_gen_id }}">
+          <div class="ai-split-hero__carousel-track-{{ ai_gen_id }}">
+            {% for i in (1..10) %}
+              {% liquid
+                assign enabled_key = 'enable_collection_' | append: i
+                assign collection_key = 'collection_' | append: i
+                assign image_key = 'collection_image_' | append: i
+                assign label_key = 'label_' | append: i
+                assign badge_key = 'badge_' | append: i
+                assign button_text_key = 'button_text_' | append: i
+
+                assign is_enabled = block.settings[enabled_key]
+                assign collection = block.settings[collection_key]
+                assign custom_image = block.settings[image_key]
+                assign label = block.settings[label_key]
+                assign badge = block.settings[badge_key]
+                assign button_text = block.settings[button_text_key]
+              %}
+
+              {% if is_enabled and collection %}
+                <div class="ai-split-hero__slide-{{ ai_gen_id }}" data-slide="{{ i }}">
+                  <div class="ai-split-hero__card-{{ ai_gen_id }}">
+                    {% if label != blank %}
+                      <div class="ai-split-hero__label-{{ ai_gen_id }}">{{ label }}</div>
+                    {% endif %}
+
+                    <div class="ai-split-hero__image-wrapper-{{ ai_gen_id }}">
+                      {% if custom_image %}
+                        <img
+                          src="{{ custom_image | image_url: width: 1000 }}"
+                          alt="{{ custom_image.alt | escape }}"
+                          loading="lazy"
+                          width="1000"
+                          height="1000"
+                          class="ai-split-hero__image-{{ ai_gen_id }}"
+                        >
+                      {% elsif collection.image %}
+                        <img
+                          src="{{ collection.image | image_url: width: 1000 }}"
+                          alt="{{ collection.image.alt | default: collection.title | escape }}"
+                          loading="lazy"
+                          width="1000"
+                          height="1000"
+                          class="ai-split-hero__image-{{ ai_gen_id }}"
+                        >
+                      {% elsif collection.products.first and collection.products.first.featured_image %}
+                        <img
+                          src="{{ collection.products.first.featured_image | image_url: width: 1000 }}"
+                          alt="{{ collection.products.first.featured_image.alt | default: collection.title | escape }}"
+                          loading="lazy"
+                          width="1000"
+                          height="1000"
+                          class="ai-split-hero__image-{{ ai_gen_id }}"
+                        >
+                      {% else %}
+                        <div class="ai-split-hero__image-placeholder-{{ ai_gen_id }}">
+                          {{ 'collection-apparel-1' | placeholder_svg_tag }}
+                        </div>
+                      {% endif %}
+
+                      {% if badge != blank %}
+                        <div class="ai-split-hero__badge-{{ ai_gen_id }}">{{ badge }}</div>
+                      {% endif %}
+                    </div>
+
+                    <h2 class="ai-split-hero__title-{{ ai_gen_id }}">{{ collection.title }}</h2>
+                    <a href="{{ collection.url }}" class="ai-split-hero__button-{{ ai_gen_id }}">
+                      {% if button_text != blank %}
+                        {{ button_text }}
+                      {% else %}
+                        Shop Now
+                      {% endif %}
+                    </a>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="ai-split-hero__navigation-{{ ai_gen_id }}">
+          <button class="ai-split-hero__nav-button-{{ ai_gen_id }}" data-nav="prev" aria-label="Previous collection">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+
+          <div class="ai-split-hero__dots-{{ ai_gen_id }}">
+            {% assign dot_index = 0 %}
+            {% for i in (1..10) %}
+              {% assign enabled_key = 'enable_collection_' | append: i %}
+              {% assign collection_key = 'collection_' | append: i %}
+              {% assign is_enabled = block.settings[enabled_key] %}
+              {% assign collection = block.settings[collection_key] %}
+              {% if is_enabled and collection %}
+                {% assign dot_index = dot_index | plus: 1 %}
+                <button class="ai-split-hero__dot-{{ ai_gen_id }}" data-dot="{{ dot_index }}" aria-label="Go to collection {{ dot_index }}"></button>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <button class="ai-split-hero__nav-button-{{ ai_gen_id }}" data-nav="next" aria-label="Next collection">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</premium-split-hero-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PremiumSplitHero{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.currentSlide = 1;
+        this.isAnimating = false;
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.ai-split-hero__carousel-track-{{ ai_gen_id }}');
+        this.slides = this.querySelectorAll('.ai-split-hero__slide-{{ ai_gen_id }}');
+        this.featuredTrack = this.querySelector('.ai-split-hero__featured-track-{{ ai_gen_id }}');
+        this.featuredSlides = this.querySelectorAll('.ai-split-hero__featured-slide-{{ ai_gen_id }}');
+        this.dots = this.querySelectorAll('.ai-split-hero__dot-{{ ai_gen_id }}');
+        this.prevButton = this.querySelector('[data-nav="prev"]');
+        this.nextButton = this.querySelector('[data-nav="next"]');
+        this.totalSlides = this.slides.length;
+
+        if (this.totalSlides > 0) {
+          this.slides[0].classList.add('active');
+          if (this.featuredSlides.length > 0) {
+            this.featuredSlides[0].classList.add('active');
+          }
+          if (this.dots.length > 0) {
+            this.dots[0].classList.add('active');
+          }
+          this.setupEventListeners();
+        }
+      }
+
+      setupEventListeners() {
+        if (this.prevButton) {
+          this.prevButton.addEventListener('click', () => this.navigate('prev'));
+        }
+        
+        if (this.nextButton) {
+          this.nextButton.addEventListener('click', () => this.navigate('next'));
+        }
+
+        this.dots.forEach((dot, index) => {
+          dot.addEventListener('click', () => this.goToSlide(index + 1));
+        });
+
+        this.track.addEventListener('touchstart', (e) => {
+          this.touchStartX = e.changedTouches[0].screenX;
+        });
+
+        this.track.addEventListener('touchend', (e) => {
+          this.touchEndX = e.changedTouches[0].screenX;
+          this.handleSwipe();
+        });
+      }
+
+      handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = this.touchStartX - this.touchEndX;
+
+        if (Math.abs(diff) > swipeThreshold) {
+          if (diff > 0) {
+            this.navigate('next');
+          } else {
+            this.navigate('prev');
+          }
+        }
+      }
+
+      navigate(direction) {
+        if (this.isAnimating || this.totalSlides === 0) return;
+
+        if (direction === 'next') {
+          this.currentSlide = this.currentSlide === this.totalSlides ? 1 : this.currentSlide + 1;
+        } else {
+          this.currentSlide = this.currentSlide === 1 ? this.totalSlides : this.currentSlide - 1;
+        }
+
+        this.updateCarousel();
+      }
+
+      goToSlide(slideNumber) {
+        if (this.isAnimating || slideNumber === this.currentSlide || this.totalSlides === 0) return;
+        this.currentSlide = slideNumber;
+        this.updateCarousel();
+      }
+
+      updateCarousel() {
+        this.isAnimating = true;
+
+        this.slides.forEach((slide, index) => {
+          if (index + 1 === this.currentSlide) {
+            slide.classList.add('active');
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        this.featuredSlides.forEach((slide, index) => {
+          if (index + 1 === this.currentSlide) {
+            slide.classList.add('active');
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        this.dots.forEach((dot, index) => {
+          if (index + 1 === this.currentSlide) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+
+        const offset = -(this.currentSlide - 1) * 100;
+        this.track.style.transform = `translateX(${offset}%)`;
+        this.featuredTrack.style.transform = `translateX(${offset}%)`;
+
+        setTimeout(() => {
+          this.isAnimating = false;
+        }, 600);
+      }
+    }
+
+    customElements.define('premium-split-hero-{{ ai_gen_id }}', PremiumSplitHero{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Premium split hero",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "label": "Desktop height",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "mobile_image_height",
+      "min": 40,
+      "max": 80,
+      "step": 5,
+      "unit": "vh",
+      "label": "Mobile image height",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "featured_image_ratio",
+      "label": "Featured image ratio",
+      "options": [
+        {
+          "value": "1/1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "3/4",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "2/3",
+          "label": "Portrait (2:3)"
+        },
+        {
+          "value": "4/3",
+          "label": "Landscape (4:3)"
+        },
+        {
+          "value": "16/9",
+          "label": "Landscape (16:9)"
+        },
+        {
+          "value": "auto",
+          "label": "Original"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "select",
+      "id": "featured_image_position",
+      "label": "Featured image position",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Collection 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_1",
+      "label": "Enable collection 1",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_1",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_1",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_1",
+      "label": "Label",
+      "default": "Editor's Pick"
+    },
+    {
+      "type": "text",
+      "id": "badge_1",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_1",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_2",
+      "label": "Enable collection 2",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_2",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_2",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_2",
+      "label": "Label",
+      "default": "Trending Now"
+    },
+    {
+      "type": "text",
+      "id": "badge_2",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_2",
+      "label": "Button text",
+      "default": "Explore"
+    },
+    {
+      "type": "header",
+      "content": "Collection 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_3",
+      "label": "Enable collection 3",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_3",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_3",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_3",
+      "label": "Label",
+      "default": "Best Sellers"
+    },
+    {
+      "type": "text",
+      "id": "badge_3",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_3",
+      "label": "Button text",
+      "default": "Discover"
+    },
+    {
+      "type": "header",
+      "content": "Collection 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_4",
+      "label": "Enable collection 4",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_4",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_4",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_4",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "badge_4",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_4",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_5",
+      "label": "Enable collection 5",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_5",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_5",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_5",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "badge_5",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_5",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection 6"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_6",
+      "label": "Enable collection 6",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_6",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_6",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_6",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "badge_6",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_6",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection 7"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_7",
+      "label": "Enable collection 7",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_7",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_7",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_7",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "badge_7",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_7",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection 8"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_8",
+      "label": "Enable collection 8",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_8",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_8",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_8",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "badge_8",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_8",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection 9"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_9",
+      "label": "Enable collection 9",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_9",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_9",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_9",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "badge_9",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_9",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection 10"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_collection_10",
+      "label": "Enable collection 10",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image_10",
+      "label": "Featured image (left side)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_10",
+      "label": "Collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_image_10",
+      "label": "Collection image (right side)"
+    },
+    {
+      "type": "text",
+      "id": "label_10",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "badge_10",
+      "label": "Badge"
+    },
+    {
+      "type": "text",
+      "id": "button_text_10",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Collection card style"
+    },
+    {
+      "type": "range",
+      "id": "card_max_width",
+      "min": 300,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 500
+    },
+    {
+      "type": "select",
+      "id": "collection_image_ratio",
+      "label": "Collection image ratio",
+      "options": [
+        {
+          "value": "1/1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "3/4",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "2/3",
+          "label": "Portrait (2:3)"
+        },
+        {
+          "value": "4/3",
+          "label": "Landscape (4:3)"
+        },
+        {
+          "value": "16/9",
+          "label": "Landscape (16:9)"
+        }
+      ],
+      "default": "3/4"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Desktop padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile padding",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Label"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Size",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Size",
+      "default": 36
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Badge"
+    },
+    {
+      "type": "color",
+      "id": "badge_bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "badge_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 40
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Hover background",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Hover border",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "nav_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "spacing_small",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Small",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "spacing_medium",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Medium",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "spacing_large",
+      "min": 24,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Large",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium split hero"
+    }
+  ]
+}
+{% endschema %}

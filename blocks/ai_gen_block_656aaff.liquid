@@ -1,0 +1,734 @@
+{% doc %}
+  @prompt
+    A pop up link text which connects a metafield page object sand shows a beautified page. It should come with a option of either a pop up or drawer,  Need a icon option as well
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-page-link-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+
+  .ai-page-link-trigger-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: {{ block.settings.link_color }};
+    font-size: {{ block.settings.link_font_size }}px;
+    text-decoration: {{ block.settings.link_underline }};
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ai-page-link-trigger-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  .ai-page-link-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    flex-shrink: 0;
+  }
+
+  .ai-page-link-overlay-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: {{ block.settings.overlay_color }};
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 999;
+  }
+
+  .ai-page-link-overlay-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-page-link-popup-{{ ai_gen_id }} {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 90%;
+    max-width: {{ block.settings.popup_max_width }}px;
+    max-height: 90vh;
+    background-color: {{ block.settings.popup_bg_color }};
+    border-radius: {{ block.settings.popup_border_radius }}px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-page-link-popup-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .ai-page-link-drawer-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 90%;
+    max-width: {{ block.settings.drawer_width }}px;
+    height: 100%;
+    background-color: {{ block.settings.popup_bg_color }};
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-page-link-drawer-{{ ai_gen_id }}.active {
+    transform: translateX(0);
+  }
+
+  .ai-page-link-header-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: {{ block.settings.content_padding }}px;
+    border-bottom: 1px solid {{ block.settings.border_color }};
+    flex-shrink: 0;
+  }
+
+  .ai-page-link-title-{{ ai_gen_id }} {
+    margin: 0;
+    font-size: {{ block.settings.title_font_size }}px;
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-page-link-close-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: {{ block.settings.text_color }};
+    transition: opacity 0.3s ease;
+  }
+
+  .ai-page-link-close-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} {
+    padding: {{ block.settings.content_padding }}px;
+    overflow-y: auto;
+    flex-grow: 1;
+    color: {{ block.settings.text_color }};
+    line-height: 1.6;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} h1,
+  .ai-page-link-content-{{ ai_gen_id }} h2,
+  .ai-page-link-content-{{ ai_gen_id }} h3,
+  .ai-page-link-content-{{ ai_gen_id }} h4,
+  .ai-page-link-content-{{ ai_gen_id }} h5,
+  .ai-page-link-content-{{ ai_gen_id }} h6 {
+    color: {{ block.settings.heading_color }};
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} h1 {
+    font-size: 2em;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} h2 {
+    font-size: 1.5em;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} h3 {
+    font-size: 1.25em;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} p {
+    margin-bottom: 1em;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: underline;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} a:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} img {
+    max-width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    margin: 1em 0;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} ul,
+  .ai-page-link-content-{{ ai_gen_id }} ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+  }
+
+  .ai-page-link-content-{{ ai_gen_id }} li {
+    margin-bottom: 0.5em;
+  }
+
+  .ai-page-link-empty-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-style: italic;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-page-link-popup-{{ ai_gen_id }} {
+      width: 95%;
+      max-height: 85vh;
+    }
+
+    .ai-page-link-drawer-{{ ai_gen_id }} {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .ai-page-link-header-{{ ai_gen_id }},
+    .ai-page-link-content-{{ ai_gen_id }} {
+      padding: {{ block.settings.content_padding | times: 0.75 }}px;
+    }
+  }
+{% endstyle %}
+
+<page-link-modal-{{ ai_gen_id }}
+  class="ai-page-link-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <button
+    class="ai-page-link-trigger-{{ ai_gen_id }}"
+    aria-label="Open {{ block.settings.link_text }}"
+  >
+    {% if block.settings.show_icon %}
+      {% if block.settings.icon_position == 'left' %}
+        <span class="ai-page-link-icon-{{ ai_gen_id }}">
+          {% if block.settings.icon_type == 'info' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          {% elsif block.settings.icon_type == 'document' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          {% elsif block.settings.icon_type == 'book' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          {% elsif block.settings.icon_type == 'external' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          {% elsif block.settings.icon_type == 'eye' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          {% elsif block.settings.icon_type == 'arrow_right' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          {% endif %}
+        </span>
+      {% endif %}
+    {% endif %}
+    <span>{{ block.settings.link_text }}</span>
+    {% if block.settings.show_icon %}
+      {% if block.settings.icon_position == 'right' %}
+        <span class="ai-page-link-icon-{{ ai_gen_id }}">
+          {% if block.settings.icon_type == 'info' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          {% elsif block.settings.icon_type == 'document' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          {% elsif block.settings.icon_type == 'book' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+          {% elsif block.settings.icon_type == 'external' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          {% elsif block.settings.icon_type == 'eye' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          {% elsif block.settings.icon_type == 'arrow_right' %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          {% endif %}
+        </span>
+      {% endif %}
+    {% endif %}
+  </button>
+
+  <div class="ai-page-link-overlay-{{ ai_gen_id }}"></div>
+
+  {% if block.settings.display_type == 'popup' %}
+    <div
+      class="ai-page-link-popup-{{ ai_gen_id }}"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ai-page-link-title-{{ ai_gen_id }}"
+    >
+      <div class="ai-page-link-header-{{ ai_gen_id }}">
+        {% if block.settings.page %}
+          <h2
+            id="ai-page-link-title-{{ ai_gen_id }}"
+            class="ai-page-link-title-{{ ai_gen_id }}"
+          >
+            {{ block.settings.page.title }}
+          </h2>
+        {% else %}
+          <h2
+            id="ai-page-link-title-{{ ai_gen_id }}"
+            class="ai-page-link-title-{{ ai_gen_id }}"
+          >
+            {{ block.settings.link_text }}
+          </h2>
+        {% endif %}
+        <button
+          class="ai-page-link-close-{{ ai_gen_id }}"
+          aria-label="Close"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="ai-page-link-content-{{ ai_gen_id }}">
+        {% if block.settings.page %}
+          {{ block.settings.page.content }}
+        {% else %}
+          <div class="ai-page-link-empty-{{ ai_gen_id }}">
+            Next, select a page to display
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <div
+      class="ai-page-link-drawer-{{ ai_gen_id }}"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ai-page-link-title-{{ ai_gen_id }}"
+    >
+      <div class="ai-page-link-header-{{ ai_gen_id }}">
+        {% if block.settings.page %}
+          <h2
+            id="ai-page-link-title-{{ ai_gen_id }}"
+            class="ai-page-link-title-{{ ai_gen_id }}"
+          >
+            {{ block.settings.page.title }}
+          </h2>
+        {% else %}
+          <h2
+            id="ai-page-link-title-{{ ai_gen_id }}"
+            class="ai-page-link-title-{{ ai_gen_id }}"
+          >
+            {{ block.settings.link_text }}
+          </h2>
+        {% endif %}
+        <button
+          class="ai-page-link-close-{{ ai_gen_id }}"
+          aria-label="Close"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="ai-page-link-content-{{ ai_gen_id }}">
+        {% if block.settings.page %}
+          {{ block.settings.page.content }}
+        {% else %}
+          <div class="ai-page-link-empty-{{ ai_gen_id }}">
+            Next, select a page to display
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</page-link-modal-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PageLinkModal{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.trigger = this.querySelector('.ai-page-link-trigger-{{ ai_gen_id }}');
+        this.overlay = this.querySelector('.ai-page-link-overlay-{{ ai_gen_id }}');
+        this.modal = this.querySelector('.ai-page-link-popup-{{ ai_gen_id }}, .ai-page-link-drawer-{{ ai_gen_id }}');
+        this.closeButton = this.querySelector('.ai-page-link-close-{{ ai_gen_id }}');
+
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.trigger.addEventListener('click', () => this.open());
+        this.closeButton.addEventListener('click', () => this.close());
+        this.overlay.addEventListener('click', () => this.close());
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.modal.classList.contains('active')) {
+            this.close();
+          }
+        });
+      }
+
+      open() {
+        this.overlay.classList.add('active');
+        this.modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        this.closeButton.focus();
+      }
+
+      close() {
+        this.overlay.classList.remove('active');
+        this.modal.classList.remove('active');
+        document.body.style.overflow = '';
+        this.trigger.focus();
+      }
+    }
+
+    customElements.define('page-link-modal-{{ ai_gen_id }}', PageLinkModal{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Page link popup",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Link"
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "Link text",
+      "default": "View details"
+    },
+    {
+      "type": "page",
+      "id": "page",
+      "label": "Page"
+    },
+    {
+      "type": "select",
+      "id": "display_type",
+      "label": "Display type",
+      "options": [
+        {
+          "value": "popup",
+          "label": "Popup"
+        },
+        {
+          "value": "drawer",
+          "label": "Drawer"
+        }
+      ],
+      "default": "popup"
+    },
+    {
+      "type": "header",
+      "content": "Link style"
+    },
+    {
+      "type": "range",
+      "id": "link_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "link_underline",
+      "label": "Underline",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "underline",
+          "label": "Underline"
+        }
+      ],
+      "default": "underline"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link hover color",
+      "default": "#c15045"
+    },
+    {
+      "type": "header",
+      "content": "Icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "icon_type",
+      "label": "Icon type",
+      "options": [
+        {
+          "value": "info",
+          "label": "Info"
+        },
+        {
+          "value": "document",
+          "label": "Document"
+        },
+        {
+          "value": "book",
+          "label": "Book"
+        },
+        {
+          "value": "external",
+          "label": "External link"
+        },
+        {
+          "value": "eye",
+          "label": "Eye"
+        },
+        {
+          "value": "arrow_right",
+          "label": "Arrow right"
+        }
+      ],
+      "default": "info"
+    },
+    {
+      "type": "select",
+      "id": "icon_position",
+      "label": "Icon position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "header",
+      "content": "Popup settings"
+    },
+    {
+      "type": "range",
+      "id": "popup_max_width",
+      "label": "Popup max width",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "default": 800
+    },
+    {
+      "type": "range",
+      "id": "drawer_width",
+      "label": "Drawer width",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "popup_border_radius",
+      "label": "Popup border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "label": "Content padding",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "popup_bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Headings",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay",
+      "default": "rgba(0, 0, 0, 0.5)"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Title size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "presets": [
+    {
+      "name": "Page link popup"
+    }
+  ]
+}
+{% endschema %}

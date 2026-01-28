@@ -1,0 +1,818 @@
+{% doc %}
+  @prompt
+    Create a premium Shopify promotional banner section with an embedded countdown timer.
+    
+    Layout:
+    
+    Full-width horizontal banner
+    
+    Left side displays:
+    
+    Small label (e.g. “Special Offer”)
+    
+    Large headline (“Sale 30% Off”)
+    
+    Subtle countdown timer displayed inline as text (e.g. “Ends in 02d : 14h : 08m”)
+    
+    Small disclaimer text below
+    
+    Right side displays:
+    
+    Supporting headline (“Seasonal Savings Event”)
+    
+    Short description
+    
+    Primary CTA button (“Shop the Sale”)
+    
+    Countdown behavior:
+    
+    Countdown is based on a fixed end date
+    
+    Timer updates smoothly without flashing or ticking animations
+    
+    Timer inherits body font and matches brand color palette
+    
+    Mobile optimization:
+    
+    Stack content vertically
+    
+    Timer remains visible under headline
+    
+    CTA button stays prominent
+    
+    Design style:
+    
+    Luxury, minimal aesthetic
+    
+    No loud colors or heavy borders
+    
+    Clean typography and generous spacing
+    
+    Ensure accessibility, performance optimization, and responsiveness., I need blocks of Days Hour Minute and seconds, Need a Divider in between to divide in 2 equal halves 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-promo-banner-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+  }
+
+  .ai-promo-banner-container-{{ ai_gen_id }} {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .ai-promo-banner-divider-{{ ai_gen_id }} {
+    width: {{ block.settings.divider_width }}px;
+    height: 100%;
+    min-height: 200px;
+    background-color: {{ block.settings.divider_color }};
+    border-radius: {{ block.settings.divider_radius }}px;
+  }
+
+  .ai-promo-banner-left-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .ai-promo-banner-label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_size }}px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: {{ block.settings.label_color }};
+    margin: 0;
+  }
+
+  .ai-promo-banner-headline-{{ ai_gen_id }} {
+    font-size: {{ block.settings.headline_size }}px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin: 0;
+    color: {{ block.settings.headline_color }};
+  }
+
+  .ai-promo-banner-timer-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ai-promo-banner-timer-prefix-{{ ai_gen_id }} {
+    font-size: {{ block.settings.timer_prefix_size }}px;
+    color: {{ block.settings.timer_color }};
+    margin: 0;
+  }
+
+  .ai-promo-banner-timer-blocks-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.block_gap }}px;
+    flex-wrap: wrap;
+  }
+
+  .ai-promo-banner-timer-block-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: {{ block.settings.block_bg_color }};
+    border: {{ block.settings.block_border_width }}px solid {{ block.settings.block_border_color }};
+    border-radius: {{ block.settings.block_radius }}px;
+    padding: {{ block.settings.block_padding }}px;
+    min-width: {{ block.settings.block_min_width }}px;
+  }
+
+  .ai-promo-banner-timer-value-{{ ai_gen_id }} {
+    font-size: {{ block.settings.timer_value_size }}px;
+    font-weight: 700;
+    line-height: 1;
+    color: {{ block.settings.timer_value_color }};
+    margin: 0;
+  }
+
+  .ai-promo-banner-timer-label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.timer_label_size }}px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: {{ block.settings.timer_label_color }};
+    margin-top: 8px;
+  }
+
+  .ai-promo-banner-disclaimer-{{ ai_gen_id }} {
+    font-size: {{ block.settings.disclaimer_size }}px;
+    color: {{ block.settings.disclaimer_color }};
+    opacity: 0.7;
+    margin: 0;
+  }
+
+  .ai-promo-banner-right-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .ai-promo-banner-supporting-{{ ai_gen_id }} {
+    font-size: {{ block.settings.supporting_size }}px;
+    font-weight: 500;
+    margin: 0;
+    color: {{ block.settings.supporting_color }};
+  }
+
+  .ai-promo-banner-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_size }}px;
+    line-height: 1.6;
+    margin: 0;
+    color: {{ block.settings.text_color }};
+    opacity: 0.9;
+  }
+
+  .ai-promo-banner-cta-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 16px 40px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.button_size }}px;
+    font-weight: 500;
+    border-radius: {{ block.settings.button_radius }}px;
+    transition: all 0.3s ease;
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+  }
+
+  .ai-promo-banner-cta-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg }};
+    color: {{ block.settings.button_hover_text }};
+    border-color: {{ block.settings.button_hover_border }};
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-promo-banner-container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .ai-promo-banner-divider-{{ ai_gen_id }} {
+      width: 100%;
+      height: {{ block.settings.divider_width }}px;
+      min-height: auto;
+    }
+
+    .ai-promo-banner-headline-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.headline_size }}px * 0.7);
+    }
+
+    .ai-promo-banner-timer-value-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.timer_value_size }}px * 0.8);
+    }
+
+    .ai-promo-banner-supporting-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.supporting_size }}px * 0.85);
+    }
+
+    .ai-promo-banner-right-{{ ai_gen_id }} {
+      align-items: stretch;
+    }
+
+    .ai-promo-banner-cta-{{ ai_gen_id }} {
+      text-align: center;
+      width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-promo-banner-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_vertical | times: 0.6 }}px {{ block.settings.padding_horizontal | times: 0.6 }}px;
+    }
+
+    .ai-promo-banner-container-{{ ai_gen_id }} {
+      gap: 30px;
+    }
+
+    .ai-promo-banner-timer-block-{{ ai_gen_id }} {
+      min-width: calc({{ block.settings.block_min_width }}px * 0.8);
+      padding: calc({{ block.settings.block_padding }}px * 0.8);
+    }
+
+    .ai-promo-banner-timer-value-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.timer_value_size }}px * 0.7);
+    }
+
+    .ai-promo-banner-timer-label-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.timer_label_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<promo-banner-{{ ai_gen_id }}
+  class="ai-promo-banner-{{ ai_gen_id }}"
+  data-end-date="{{ block.settings.end_date }}"
+  data-end-time="{{ block.settings.end_time }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-promo-banner-container-{{ ai_gen_id }}">
+    <div class="ai-promo-banner-left-{{ ai_gen_id }}">
+      {% if block.settings.label != blank %}
+        <p class="ai-promo-banner-label-{{ ai_gen_id }}">{{ block.settings.label }}</p>
+      {% endif %}
+
+      {% if block.settings.headline != blank %}
+        <h2 class="ai-promo-banner-headline-{{ ai_gen_id }}">{{ block.settings.headline }}</h2>
+      {% endif %}
+
+      <div class="ai-promo-banner-timer-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.timer_prefix != blank %}
+          <p class="ai-promo-banner-timer-prefix-{{ ai_gen_id }}">{{ block.settings.timer_prefix }}</p>
+        {% endif %}
+
+        <div class="ai-promo-banner-timer-blocks-{{ ai_gen_id }}">
+          <div class="ai-promo-banner-timer-block-{{ ai_gen_id }}">
+            <div class="ai-promo-banner-timer-value-{{ ai_gen_id }}" data-days>00</div>
+            <div class="ai-promo-banner-timer-label-{{ ai_gen_id }}">Days</div>
+          </div>
+
+          <div class="ai-promo-banner-timer-block-{{ ai_gen_id }}">
+            <div class="ai-promo-banner-timer-value-{{ ai_gen_id }}" data-hours>00</div>
+            <div class="ai-promo-banner-timer-label-{{ ai_gen_id }}">Hours</div>
+          </div>
+
+          <div class="ai-promo-banner-timer-block-{{ ai_gen_id }}">
+            <div class="ai-promo-banner-timer-value-{{ ai_gen_id }}" data-minutes>00</div>
+            <div class="ai-promo-banner-timer-label-{{ ai_gen_id }}">Minutes</div>
+          </div>
+
+          <div class="ai-promo-banner-timer-block-{{ ai_gen_id }}">
+            <div class="ai-promo-banner-timer-value-{{ ai_gen_id }}" data-seconds>00</div>
+            <div class="ai-promo-banner-timer-label-{{ ai_gen_id }}">Seconds</div>
+          </div>
+        </div>
+      </div>
+
+      {% if block.settings.disclaimer != blank %}
+        <p class="ai-promo-banner-disclaimer-{{ ai_gen_id }}">{{ block.settings.disclaimer }}</p>
+      {% endif %}
+    </div>
+
+    {% if block.settings.show_divider %}
+      <div class="ai-promo-banner-divider-{{ ai_gen_id }}"></div>
+    {% endif %}
+
+    <div class="ai-promo-banner-right-{{ ai_gen_id }}">
+      {% if block.settings.supporting_headline != blank %}
+        <h3 class="ai-promo-banner-supporting-{{ ai_gen_id }}">{{ block.settings.supporting_headline }}</h3>
+      {% endif %}
+
+      {% if block.settings.description != blank %}
+        <p class="ai-promo-banner-description-{{ ai_gen_id }}">{{ block.settings.description }}</p>
+      {% endif %}
+
+      {% if block.settings.button_text != blank %}
+        <a
+          href="{{ block.settings.button_link }}"
+          class="ai-promo-banner-cta-{{ ai_gen_id }}"
+        >
+          {{ block.settings.button_text }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</promo-banner-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PromoBanner{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.daysElement = this.querySelector('[data-days]');
+        this.hoursElement = this.querySelector('[data-hours]');
+        this.minutesElement = this.querySelector('[data-minutes]');
+        this.secondsElement = this.querySelector('[data-seconds]');
+        this.endDate = this.dataset.endDate;
+        this.endTime = this.dataset.endTime;
+        this.intervalId = null;
+      }
+
+      connectedCallback() {
+        if (this.endDate && this.endTime) {
+          this.startCountdown();
+        }
+      }
+
+      disconnectedCallback() {
+        if (this.intervalId) {
+          clearInterval(this.intervalId);
+        }
+      }
+
+      startCountdown() {
+        const targetDateTime = new Date(this.endDate + 'T' + this.endTime).getTime();
+
+        const updateTimer = () => {
+          const now = new Date().getTime();
+          const distance = targetDateTime - now;
+
+          if (distance < 0) {
+            if (this.intervalId) {
+              clearInterval(this.intervalId);
+            }
+            this.daysElement.textContent = '00';
+            this.hoursElement.textContent = '00';
+            this.minutesElement.textContent = '00';
+            this.secondsElement.textContent = '00';
+            return;
+          }
+
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          this.daysElement.textContent = String(days).padStart(2, '0');
+          this.hoursElement.textContent = String(hours).padStart(2, '0');
+          this.minutesElement.textContent = String(minutes).padStart(2, '0');
+          this.secondsElement.textContent = String(seconds).padStart(2, '0');
+        };
+
+        updateTimer();
+        this.intervalId = setInterval(updateTimer, 1000);
+      }
+    }
+
+    customElements.define('promo-banner-{{ ai_gen_id }}', PromoBanner{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Promotional banner",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Left side content"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Special Offer"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Sale 30% Off"
+    },
+    {
+      "type": "text",
+      "id": "timer_prefix",
+      "label": "Timer prefix",
+      "default": "Ends in"
+    },
+    {
+      "type": "text",
+      "id": "disclaimer",
+      "label": "Disclaimer",
+      "default": "Limited time only. Terms apply."
+    },
+    {
+      "type": "header",
+      "content": "Right side content"
+    },
+    {
+      "type": "text",
+      "id": "supporting_headline",
+      "label": "Supporting headline",
+      "default": "Seasonal Savings Event"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Discover premium products at unbeatable prices. Shop our curated collection before time runs out."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop the Sale"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Width",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "divider_radius",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Color",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "header",
+      "content": "Countdown timer"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End date",
+      "info": "Format: YYYY-MM-DD (e.g., 2025-12-31)",
+      "default": "2025-12-31"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End time",
+      "info": "Format: HH:MM (24-hour, e.g., 23:59)",
+      "default": "23:59"
+    },
+    {
+      "type": "header",
+      "content": "Timer block style"
+    },
+    {
+      "type": "range",
+      "id": "block_gap",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "label": "Gap between blocks",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "block_min_width",
+      "min": 50,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Block minimum width",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "block_padding",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Block padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "block_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Block border radius",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "block_bg_color",
+      "label": "Block background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "block_border_color",
+      "label": "Block border",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "range",
+      "id": "block_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Block border width",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Headline",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "timer_color",
+      "label": "Timer prefix",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "timer_value_color",
+      "label": "Timer value",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "timer_label_color",
+      "label": "Timer label",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_color",
+      "label": "Disclaimer",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "supporting_color",
+      "label": "Supporting headline",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Label size",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "headline_size",
+      "min": 24,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Headline size",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "timer_prefix_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Timer prefix size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "timer_value_size",
+      "min": 24,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Timer value size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "timer_label_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Timer label size",
+      "default": 11
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Disclaimer size",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "supporting_size",
+      "min": 16,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "label": "Supporting headline size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg",
+      "label": "Hover background",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border",
+      "label": "Hover border",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promotional banner"
+    }
+  ]
+}
+{% endschema %}

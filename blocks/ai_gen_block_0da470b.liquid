@@ -1,0 +1,1437 @@
+{% doc %}
+  @prompt
+    Create a premium testimonial carousel section for a Shopify homepage.
+    
+    The section should feature:
+    
+    A centered headline and short subheading at the top
+    
+    A horizontally scrolling carousel of customer testimonials
+    
+    Each testimonial card includes:
+    
+    Customer lifestyle image
+    
+    Short quote (1–2 lines max)
+    
+    Customer name
+    
+    Linked product name
+    
+    Carousel behavior:
+    
+    Auto-scrolls smoothly from right to left
+    
+    Infinite loop
+    
+    Pauses on hover (desktop)
+    
+    Swipeable on mobile
+    
+    Shows 3–4 cards on desktop, 1 card on mobile
+    
+    Design style:
+    
+    Minimal, luxury aesthetic
+    
+    White or soft neutral background
+    
+    Clean typography using body font
+    
+    No heavy borders
+    
+    Soft shadows or none
+    
+    Ensure the section is fully responsive, fast-loading, and accessible.
+    
+    Also piut option either we can put images or videos, It does not have video mute unmute or volume options, Still no proper section to upload video. Please add that and also add volume controls for videos, I want selection for multiple products and volume controls for videos, I need 12-24 testimonial sections, I 12 slots of testimonials, Need video to be upload via URL and it accepts every link
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-testimonial-carousel-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 20px;
+    overflow: hidden;
+    display: block;
+  }
+
+  .ai-testimonial-header-{{ ai_gen_id }} {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto {{ block.settings.header_spacing }}px;
+  }
+
+  .ai-testimonial-heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.subheading_spacing }}px;
+    font-family: var(--font-heading-family);
+  }
+
+  .ai-testimonial-subheading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.subheading_size }}px;
+    color: {{ block.settings.subheading_color }};
+    margin: 0;
+    font-family: var(--font-body-family);
+  }
+
+  .ai-testimonial-track-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 100%;
+  }
+
+  .ai-testimonial-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    transition: transform 0.5s ease;
+    will-change: transform;
+  }
+
+  .ai-testimonial-track-{{ ai_gen_id }}.paused {
+    animation-play-state: paused;
+  }
+
+  .ai-testimonial-card-{{ ai_gen_id }} {
+    flex: 0 0 auto;
+    width: {{ block.settings.card_width }}px;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    box-shadow: {{ block.settings.card_shadow }};
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ai-testimonial-media-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: {{ block.settings.media_aspect_ratio }};
+    border-radius: {{ block.settings.media_border_radius }}px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+  }
+
+  .ai-testimonial-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-testimonial-video-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-testimonial-video-controls-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .ai-testimonial-card-{{ ai_gen_id }}:hover .ai-testimonial-video-controls-{{ ai_gen_id }} {
+    opacity: 1;
+  }
+
+  .ai-testimonial-control-btn-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+  }
+
+  .ai-testimonial-control-btn-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  .ai-testimonial-volume-slider-{{ ai_gen_id }} {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .ai-testimonial-volume-fill-{{ ai_gen_id }} {
+    height: 100%;
+    background: white;
+    border-radius: 2px;
+    width: 100%;
+  }
+
+  .ai-testimonial-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+  }
+
+  .ai-testimonial-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-testimonial-quote-{{ ai_gen_id }} {
+    font-size: {{ block.settings.quote_size }}px;
+    color: {{ block.settings.quote_color }};
+    line-height: 1.5;
+    font-style: italic;
+    margin: 0;
+    font-family: var(--font-body-family);
+  }
+
+  .ai-testimonial-customer-{{ ai_gen_id }} {
+    font-size: {{ block.settings.name_size }}px;
+    color: {{ block.settings.name_color }};
+    font-weight: 600;
+    margin: 0;
+    font-family: var(--font-body-family);
+  }
+
+  .ai-testimonial-products-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ai-testimonial-product-link-{{ ai_gen_id }} {
+    font-size: 12px;
+    color: {{ block.settings.product_link_color }};
+    text-decoration: none;
+    padding: 4px 12px;
+    border: 1px solid {{ block.settings.product_link_color }};
+    border-radius: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .ai-testimonial-product-link-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.product_link_color }};
+    color: {{ block.settings.card_background }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-testimonial-card-{{ ai_gen_id }} {
+      width: 280px;
+    }
+
+    .ai-testimonial-heading-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.heading_size }}px * 0.7);
+    }
+
+    .ai-testimonial-subheading-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.subheading_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<testimonial-carousel-{{ ai_gen_id }}
+  class="ai-testimonial-carousel-{{ ai_gen_id }}"
+  data-auto-scroll="{{ block.settings.auto_scroll }}"
+  data-scroll-speed="{{ block.settings.scroll_speed }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-testimonial-header-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <h2 class="ai-testimonial-heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+    {% endif %}
+    {% if block.settings.subheading != blank %}
+      <p class="ai-testimonial-subheading-{{ ai_gen_id }}">{{ block.settings.subheading }}</p>
+    {% endif %}
+  </div>
+
+  <div class="ai-testimonial-track-wrapper-{{ ai_gen_id }}">
+    <div class="ai-testimonial-track-{{ ai_gen_id }}">
+      {% for i in (1..12) %}
+        {% liquid
+          assign media_type_key = 'testimonial_' | append: i | append: '_media_type'
+          assign image_key = 'testimonial_' | append: i | append: '_image'
+          assign video_key = 'testimonial_' | append: i | append: '_video_url'
+          assign quote_key = 'testimonial_' | append: i | append: '_quote'
+          assign name_key = 'testimonial_' | append: i | append: '_name'
+          assign product_1_key = 'testimonial_' | append: i | append: '_product_1'
+          assign product_2_key = 'testimonial_' | append: i | append: '_product_2'
+          assign product_3_key = 'testimonial_' | append: i | append: '_product_3'
+
+          assign media_type = block.settings[media_type_key]
+          assign image = block.settings[image_key]
+          assign video_url = block.settings[video_key]
+          assign quote = block.settings[quote_key]
+          assign name = block.settings[name_key]
+          assign product_1 = block.settings[product_1_key]
+          assign product_2 = block.settings[product_2_key]
+          assign product_3 = block.settings[product_3_key]
+        %}
+
+        {% if quote != blank or name != blank or image != blank or video_url != blank %}
+          <div class="ai-testimonial-card-{{ ai_gen_id }}">
+            <div class="ai-testimonial-media-wrapper-{{ ai_gen_id }}">
+              {% if media_type == 'video' and video_url != blank %}
+                <video
+                  class="ai-testimonial-video-{{ ai_gen_id }}"
+                  src="{{ video_url }}"
+                  loop
+                  muted
+                  playsinline
+                  data-video-index="{{ i }}"
+                ></video>
+                <div class="ai-testimonial-video-controls-{{ ai_gen_id }}">
+                  <button
+                    class="ai-testimonial-control-btn-{{ ai_gen_id }} ai-play-pause-{{ ai_gen_id }}"
+                    data-video-index="{{ i }}"
+                    aria-label="Play/Pause"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                  </button>
+                  <button
+                    class="ai-testimonial-control-btn-{{ ai_gen_id }} ai-mute-{{ ai_gen_id }}"
+                    data-video-index="{{ i }}"
+                    aria-label="Mute/Unmute"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                  </button>
+                  <div class="ai-testimonial-volume-slider-{{ ai_gen_id }}" data-video-index="{{ i }}">
+                    <div class="ai-testimonial-volume-fill-{{ ai_gen_id }}"></div>
+                  </div>
+                </div>
+              {% elsif image != blank %}
+                <img
+                  src="{{ image | image_url: width: 600 }}"
+                  alt="{{ name | escape }}"
+                  class="ai-testimonial-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="600"
+                  height="600"
+                >
+              {% else %}
+                <div class="ai-testimonial-placeholder-{{ ai_gen_id }}">
+                  {{ 'lifestyle-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+
+            {% if quote != blank %}
+              <p class="ai-testimonial-quote-{{ ai_gen_id }}">"{{ quote }}"</p>
+            {% endif %}
+
+            {% if name != blank %}
+              <p class="ai-testimonial-customer-{{ ai_gen_id }}">{{ name }}</p>
+            {% endif %}
+
+            {% if product_1 != blank or product_2 != blank or product_3 != blank %}
+              <div class="ai-testimonial-products-{{ ai_gen_id }}">
+                {% if product_1 != blank %}
+                  <a href="{{ product_1.url }}" class="ai-testimonial-product-link-{{ ai_gen_id }}">
+                    {{ product_1.title }}
+                  </a>
+                {% endif %}
+                {% if product_2 != blank %}
+                  <a href="{{ product_2.url }}" class="ai-testimonial-product-link-{{ ai_gen_id }}">
+                    {{ product_2.title }}
+                  </a>
+                {% endif %}
+                {% if product_3 != blank %}
+                  <a href="{{ product_3.url }}" class="ai-testimonial-product-link-{{ ai_gen_id }}">
+                    {{ product_3.title }}
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</testimonial-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class TestimonialCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = this.querySelector('.ai-testimonial-track-{{ ai_gen_id }}');
+        this.autoScroll = this.dataset.autoScroll === 'true';
+        this.scrollSpeed = parseFloat(this.dataset.scrollSpeed) || 1;
+        this.scrollPosition = 0;
+        this.animationId = null;
+        this.isPaused = false;
+      }
+
+      connectedCallback() {
+        this.cloneCards();
+        this.setupVideoControls();
+        this.setupTouchEvents();
+        
+        if (this.autoScroll) {
+          this.startAutoScroll();
+          this.setupHoverPause();
+        }
+      }
+
+      cloneCards() {
+        const cards = Array.from(this.track.children);
+        cards.forEach(card => {
+          const clone = card.cloneNode(true);
+          this.track.appendChild(clone);
+        });
+      }
+
+      startAutoScroll() {
+        const scroll = () => {
+          if (!this.isPaused) {
+            this.scrollPosition += this.scrollSpeed;
+            const trackWidth = this.track.scrollWidth / 2;
+            
+            if (this.scrollPosition >= trackWidth) {
+              this.scrollPosition = 0;
+            }
+            
+            this.track.style.transform = `translateX(-${this.scrollPosition}px)`;
+          }
+          this.animationId = requestAnimationFrame(scroll);
+        };
+        this.animationId = requestAnimationFrame(scroll);
+      }
+
+      setupHoverPause() {
+        this.addEventListener('mouseenter', () => {
+          this.isPaused = true;
+        });
+
+        this.addEventListener('mouseleave', () => {
+          this.isPaused = false;
+        });
+      }
+
+      setupTouchEvents() {
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        this.track.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+          isDragging = true;
+          this.isPaused = true;
+        });
+
+        this.track.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          currentX = e.touches[0].clientX;
+          const diff = startX - currentX;
+          this.scrollPosition += diff;
+          startX = currentX;
+        });
+
+        this.track.addEventListener('touchend', () => {
+          isDragging = false;
+          this.isPaused = false;
+        });
+      }
+
+      setupVideoControls() {
+        const videos = this.querySelectorAll('.ai-testimonial-video-{{ ai_gen_id }}');
+        
+        videos.forEach(video => {
+          const index = video.dataset.videoIndex;
+          const playPauseBtn = this.querySelector(`.ai-play-pause-{{ ai_gen_id }}[data-video-index="${index}"]`);
+          const muteBtn = this.querySelector(`.ai-mute-{{ ai_gen_id }}[data-video-index="${index}"]`);
+          const volumeSlider = this.querySelector(`.ai-testimonial-volume-slider-{{ ai_gen_id }}[data-video-index="${index}"]`);
+          const volumeFill = volumeSlider.querySelector('.ai-testimonial-volume-fill-{{ ai_gen_id }}');
+
+          playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+              video.play();
+              playPauseBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
+            } else {
+              video.pause();
+              playPauseBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+            }
+          });
+
+          muteBtn.addEventListener('click', () => {
+            video.muted = !video.muted;
+            if (video.muted) {
+              muteBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+            } else {
+              muteBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+            }
+          });
+
+          volumeSlider.addEventListener('click', (e) => {
+            const rect = volumeSlider.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.volume = Math.max(0, Math.min(1, percent));
+            volumeFill.style.width = (percent * 100) + '%';
+          });
+
+          video.addEventListener('volumechange', () => {
+            volumeFill.style.width = (video.volume * 100) + '%';
+          });
+        });
+      }
+
+      disconnectedCallback() {
+        if (this.animationId) {
+          cancelAnimationFrame(this.animationId);
+        }
+      }
+    }
+
+    customElements.define('testimonial-carousel-{{ ai_gen_id }}', TestimonialCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Testimonial carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What our customers say"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real stories from real people"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "label": "Subheading size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Header spacing",
+      "min": 20,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "subheading_spacing",
+      "label": "Subheading spacing",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Carousel settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_scroll",
+      "label": "Auto scroll",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll speed",
+      "min": 0.5,
+      "max": 3,
+      "step": 0.5,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card width",
+      "min": 250,
+      "max": 450,
+      "step": 10,
+      "unit": "px",
+      "default": 350
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 15,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "card_shadow",
+      "label": "Card shadow",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "0 2px 8px rgba(0,0,0,0.08)",
+          "label": "Soft"
+        },
+        {
+          "value": "0 4px 12px rgba(0,0,0,0.12)",
+          "label": "Medium"
+        }
+      ],
+      "default": "0 2px 8px rgba(0,0,0,0.08)"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 30,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "media_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        {
+          "value": "1/1",
+          "label": "Square"
+        },
+        {
+          "value": "4/3",
+          "label": "Landscape"
+        },
+        {
+          "value": "16/9",
+          "label": "Widescreen"
+        },
+        {
+          "value": "3/4",
+          "label": "Portrait"
+        }
+      ],
+      "default": "1/1"
+    },
+    {
+      "type": "range",
+      "id": "media_border_radius",
+      "label": "Media border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Subheading",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "quote_color",
+      "label": "Quote",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "quote_size",
+      "label": "Quote size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "name_color",
+      "label": "Name",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "name_size",
+      "label": "Name size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "product_link_color",
+      "label": "Product link",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 1"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_1_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_1_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_1_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_1_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_1_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_1_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_1_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 2"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_2_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_2_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_2_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_2_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_2_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_2_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_2_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 3"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_3_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_3_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_3_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_3_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_3_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_3_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_3_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 4"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_4_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_4_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_4_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_4_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_4_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_4_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_4_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 5"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_5_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_5_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_5_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_5_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_5_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_5_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_5_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 6"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_6_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_6_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_6_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_6_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_6_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_6_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_6_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_6_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 7"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_7_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_7_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_7_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_7_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_7_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_7_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_7_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_7_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 8"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_8_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_8_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_8_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_8_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_8_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_8_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_8_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_8_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 9"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_9_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_9_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_9_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_9_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_9_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_9_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_9_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_9_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 10"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_10_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_10_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_10_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_10_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_10_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_10_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_10_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_10_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 11"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_11_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_11_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_11_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_11_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_11_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_11_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_11_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_11_product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Testimonial 12"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_12_media_type",
+      "label": "Media type",
+      "options": [
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_12_image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "testimonial_12_video_url",
+      "label": "Video URL"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_12_quote",
+      "label": "Quote"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_12_name",
+      "label": "Customer name"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_12_product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_12_product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "testimonial_12_product_3",
+      "label": "Product 3"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonial carousel"
+    }
+  ]
+}
+{% endschema %}

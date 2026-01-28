@@ -1,0 +1,815 @@
+{% doc %}
+  @prompt
+    Design a luxury editorial scroll section for a premium e-commerce website selling sneakers, apparel, accessories, and watches, where both images and content change together as the user scrolls.
+    
+    Desktop layout:
+    – Two-column layout
+    – Left column: editorial text content
+    – Right column: high-quality editorial images
+    – As the user scrolls, each editorial “chapter” activates:
+    – The image changes
+    – The headline and supporting copy update simultaneously
+    – Previous images and content subtly fade or stack behind the active state
+    
+    Content structure per chapter:
+    – Small section label (e.g., “THE EDIT”, “CURATED”, or category name)
+    – One strong headline (editorial, not promotional)
+    – Short supporting paragraph (2 lines max)
+    – Optional minimal CTA (same CTA reused across chapters)
+    
+    Scroll interaction rules:
+    – Smooth, controlled transitions (200–300ms ease-in-out)
+    – No snap scrolling
+    – No aggressive parallax
+    – No autoplay or looping
+    – One chapter active at a time
+    
+    Mobile behavior (critical):
+    – Scroll-based image/content syncing is simplified or disabled
+    – Each chapter stacks vertically as a clean block:
+    
+    Image
+    
+    Headline
+    
+    Supporting copy
+    
+    CTA
+    – No overlapping images on mobile
+    – Optimized for performance and readability
+    
+    Style & tone:
+    – Luxury, editorial, restrained
+    – No promotional language
+    – No loud animations
+    – Plenty of white space
+    – Feels like a curated lookbook, not a marketing slider
+    
+    UX & performance:
+    – Entire section should feel intentional and calm
+    – Transitions should be barely noticeable
+    – Accessibility-friendly and responsive, i don't want the image below the content and the image should stack one behind the other on desktop, I need option for image ratio
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-editorial-scroll-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+    padding: {{ block.settings.section_padding_desktop }}px 0;
+  }
+
+  .ai-editorial-scroll__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .ai-editorial-scroll__grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .ai-editorial-scroll__content-column-{{ ai_gen_id }} {
+    position: relative;
+  }
+
+  .ai-editorial-scroll__image-column-{{ ai_gen_id }} {
+    position: sticky;
+    top: 120px;
+    overflow: visible;
+  }
+
+  .ai-editorial-scroll__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    {% if block.settings.image_ratio == 'square' %}
+      aspect-ratio: 1 / 1;
+    {% elsif block.settings.image_ratio == 'portrait' %}
+      aspect-ratio: 3 / 4;
+    {% elsif block.settings.image_ratio == 'landscape' %}
+      aspect-ratio: 4 / 3;
+    {% elsif block.settings.image_ratio == 'tall' %}
+      aspect-ratio: 2 / 3;
+    {% else %}
+      height: 600px;
+    {% endif %}
+  }
+
+  .ai-editorial-scroll__image-item-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+    transition: opacity 250ms ease-in-out, transform 250ms ease-in-out;
+    pointer-events: none;
+  }
+
+  .ai-editorial-scroll__image-item-{{ ai_gen_id }}.active {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+    z-index: 2;
+  }
+
+  .ai-editorial-scroll__image-item-{{ ai_gen_id }}.stacked {
+    opacity: 0.4;
+    transform: scale(0.95) translateY(20px);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ai-editorial-scroll__image-item-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-editorial-scroll__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-editorial-scroll__image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 200px;
+    max-height: 200px;
+    opacity: 0.3;
+  }
+
+  .ai-editorial-scroll__chapter-{{ ai_gen_id }} {
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 0;
+    opacity: 0.3;
+    transition: opacity 250ms ease-in-out;
+  }
+
+  .ai-editorial-scroll__chapter-{{ ai_gen_id }}.active {
+    opacity: 1;
+  }
+
+  .ai-editorial-scroll__label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_size }}px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    color: {{ block.settings.label_color }};
+    font-weight: 500;
+  }
+
+  .ai-editorial-scroll__headline-{{ ai_gen_id }} {
+    font-size: {{ block.settings.headline_size }}px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: {{ block.settings.headline_color }};
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+
+  .ai-editorial-scroll__description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_size }}px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+    color: {{ block.settings.text_color }};
+    max-width: 480px;
+  }
+
+  .ai-editorial-scroll__cta-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 14px 32px;
+    background-color: {{ block.settings.cta_background }};
+    color: {{ block.settings.cta_text_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.cta_size }}px;
+    letter-spacing: 0.05em;
+    transition: all 200ms ease-in-out;
+    border: 1px solid {{ block.settings.cta_border_color }};
+  }
+
+  .ai-editorial-scroll__cta-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.cta_hover_background }};
+    color: {{ block.settings.cta_hover_text_color }};
+    border-color: {{ block.settings.cta_hover_border_color }};
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-editorial-scroll-{{ ai_gen_id }} {
+      padding: {{ block.settings.section_padding_mobile }}px 0;
+    }
+
+    .ai-editorial-scroll__container-{{ ai_gen_id }} {
+      padding: 0 24px;
+    }
+
+    .ai-editorial-scroll__grid-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: 60px;
+    }
+
+    .ai-editorial-scroll__image-column-{{ ai_gen_id }} {
+      position: relative;
+      top: 0;
+      order: -1;
+    }
+
+    .ai-editorial-scroll__image-wrapper-{{ ai_gen_id }} {
+      {% if block.settings.mobile_image_ratio == 'square' %}
+        aspect-ratio: 1 / 1;
+      {% elsif block.settings.mobile_image_ratio == 'portrait' %}
+        aspect-ratio: 3 / 4;
+      {% elsif block.settings.mobile_image_ratio == 'landscape' %}
+        aspect-ratio: 4 / 3;
+      {% else %}
+        aspect-ratio: 4 / 5;
+      {% endif %}
+      height: auto;
+    }
+
+    .ai-editorial-scroll__image-item-{{ ai_gen_id }} {
+      position: relative;
+      opacity: 1;
+      transform: none;
+      margin-bottom: 40px;
+      height: auto;
+      {% if block.settings.mobile_image_ratio == 'square' %}
+        aspect-ratio: 1 / 1;
+      {% elsif block.settings.mobile_image_ratio == 'portrait' %}
+        aspect-ratio: 3 / 4;
+      {% elsif block.settings.mobile_image_ratio == 'landscape' %}
+        aspect-ratio: 4 / 3;
+      {% else %}
+        aspect-ratio: 4 / 5;
+      {% endif %}
+    }
+
+    .ai-editorial-scroll__image-item-{{ ai_gen_id }}.active,
+    .ai-editorial-scroll__image-item-{{ ai_gen_id }}.stacked {
+      opacity: 1;
+      transform: none;
+      z-index: auto;
+    }
+
+    .ai-editorial-scroll__chapter-{{ ai_gen_id }} {
+      min-height: auto;
+      padding: 0 0 60px 0;
+      opacity: 1;
+    }
+
+    .ai-editorial-scroll__chapter-{{ ai_gen_id }}:last-child {
+      padding-bottom: 0;
+    }
+
+    .ai-editorial-scroll__headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_size | times: 0.6 }}px;
+    }
+
+    .ai-editorial-scroll__label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_size | times: 0.9 }}px;
+      margin-bottom: 16px;
+    }
+
+    .ai-editorial-scroll__description-{{ ai_gen_id }} {
+      font-size: {{ block.settings.description_size | times: 0.95 }}px;
+      margin-bottom: 24px;
+    }
+  }
+{% endstyle %}
+
+<editorial-scroll-{{ ai_gen_id }}
+  class="ai-editorial-scroll-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-editorial-scroll__container-{{ ai_gen_id }}">
+    <div class="ai-editorial-scroll__grid-{{ ai_gen_id }}">
+      <div class="ai-editorial-scroll__content-column-{{ ai_gen_id }}">
+        {% for i in (1..4) %}
+          {% liquid
+            assign chapter_enabled_key = 'chapter_' | append: i | append: '_enabled'
+            assign chapter_label_key = 'chapter_' | append: i | append: '_label'
+            assign chapter_headline_key = 'chapter_' | append: i | append: '_headline'
+            assign chapter_description_key = 'chapter_' | append: i | append: '_description'
+
+            assign chapter_enabled = block.settings[chapter_enabled_key]
+            assign chapter_label = block.settings[chapter_label_key]
+            assign chapter_headline = block.settings[chapter_headline_key]
+            assign chapter_description = block.settings[chapter_description_key]
+          %}
+
+          {% if chapter_enabled %}
+            <div
+              class="ai-editorial-scroll__chapter-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+              data-chapter="{{ i }}"
+            >
+              {% if chapter_label != blank %}
+                <div class="ai-editorial-scroll__label-{{ ai_gen_id }}">
+                  {{ chapter_label }}
+                </div>
+              {% endif %}
+
+              {% if chapter_headline != blank %}
+                <h2 class="ai-editorial-scroll__headline-{{ ai_gen_id }}">
+                  {{ chapter_headline }}
+                </h2>
+              {% endif %}
+
+              {% if chapter_description != blank %}
+                <div class="ai-editorial-scroll__description-{{ ai_gen_id }}">
+                  {{ chapter_description }}
+                </div>
+              {% endif %}
+
+              {% if block.settings.cta_text != blank and block.settings.cta_url != blank %}
+                <a
+                  href="{{ block.settings.cta_url }}"
+                  class="ai-editorial-scroll__cta-{{ ai_gen_id }}"
+                >
+                  {{ block.settings.cta_text }}
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="ai-editorial-scroll__image-column-{{ ai_gen_id }}">
+        <div class="ai-editorial-scroll__image-wrapper-{{ ai_gen_id }}">
+          {% for i in (1..4) %}
+            {% liquid
+              assign chapter_enabled_key = 'chapter_' | append: i | append: '_enabled'
+              assign chapter_image_key = 'chapter_' | append: i | append: '_image'
+
+              assign chapter_enabled = block.settings[chapter_enabled_key]
+              assign chapter_image = block.settings[chapter_image_key]
+            %}
+
+            {% if chapter_enabled %}
+              <div
+                class="ai-editorial-scroll__image-item-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+                data-image="{{ i }}"
+              >
+                {% if chapter_image %}
+                  <img
+                    src="{{ chapter_image | image_url: width: 1200 }}"
+                    alt="{{ chapter_image.alt | escape }}"
+                    loading="lazy"
+                    width="{{ chapter_image.width }}"
+                    height="{{ chapter_image.height }}"
+                  >
+                {% else %}
+                  <div class="ai-editorial-scroll__image-placeholder-{{ ai_gen_id }}">
+                    {{ 'image' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</editorial-scroll-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class EditorialScroll{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.chapters = [];
+        this.images = [];
+        this.activeIndex = 0;
+      }
+
+      connectedCallback() {
+        this.chapters = Array.from(this.querySelectorAll('.ai-editorial-scroll__chapter-{{ ai_gen_id }}'));
+        this.images = Array.from(this.querySelectorAll('.ai-editorial-scroll__image-item-{{ ai_gen_id }}'));
+        
+        if (this.chapters.length === 0) return;
+
+        if (window.innerWidth > 989) {
+          this.setupScrollObserver();
+        }
+      }
+
+      setupScrollObserver() {
+        const options = {
+          root: null,
+          rootMargin: '-40% 0px -40% 0px',
+          threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const chapterIndex = this.chapters.indexOf(entry.target);
+              if (chapterIndex !== -1 && chapterIndex !== this.activeIndex) {
+                this.activateChapter(chapterIndex);
+              }
+            }
+          });
+        }, options);
+
+        this.chapters.forEach((chapter) => {
+          observer.observe(chapter);
+        });
+      }
+
+      activateChapter(index) {
+        this.activeIndex = index;
+
+        this.chapters.forEach((chapter, i) => {
+          if (i === index) {
+            chapter.classList.add('active');
+          } else {
+            chapter.classList.remove('active');
+          }
+        });
+
+        this.images.forEach((image, i) => {
+          image.classList.remove('active', 'stacked');
+          
+          if (i === index) {
+            image.classList.add('active');
+          } else if (i < index) {
+            image.classList.add('stacked');
+          }
+        });
+      }
+    }
+
+    customElements.define('editorial-scroll-{{ ai_gen_id }}', EditorialScroll{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Editorial scroll",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 1000,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 1400
+    },
+    {
+      "type": "range",
+      "id": "section_padding_desktop",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Desktop padding",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "section_padding_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Mobile padding",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Image settings"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Desktop image ratio",
+      "options": [
+        {
+          "value": "natural",
+          "label": "Natural"
+        },
+        {
+          "value": "square",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "tall",
+          "label": "Tall (2:3)"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape (4:3)"
+        }
+      ],
+      "default": "natural"
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_ratio",
+      "label": "Mobile image ratio",
+      "options": [
+        {
+          "value": "portrait_tall",
+          "label": "Portrait tall (4:5)"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "square",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape (4:3)"
+        }
+      ],
+      "default": "portrait_tall"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Headline",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Label size",
+      "default": 11
+    },
+    {
+      "type": "range",
+      "id": "headline_size",
+      "min": 24,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Headline size",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Call to action"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Explore"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "cta_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Button text size",
+      "default": 13
+    },
+    {
+      "type": "color",
+      "id": "cta_background",
+      "label": "Button background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "cta_text_color",
+      "label": "Button text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "cta_border_color",
+      "label": "Button border",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "cta_hover_background",
+      "label": "Button hover background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "cta_hover_text_color",
+      "label": "Button hover text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "cta_hover_border_color",
+      "label": "Button hover border",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Chapter 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "chapter_1_enabled",
+      "label": "Enable chapter 1",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "chapter_1_label",
+      "label": "Label",
+      "default": "THE EDIT"
+    },
+    {
+      "type": "text",
+      "id": "chapter_1_headline",
+      "label": "Headline",
+      "default": "Crafted for the discerning"
+    },
+    {
+      "type": "textarea",
+      "id": "chapter_1_description",
+      "label": "Description",
+      "default": "A curated selection of timeless pieces that transcend seasonal trends. Each item chosen for its exceptional quality and enduring appeal."
+    },
+    {
+      "type": "image_picker",
+      "id": "chapter_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Chapter 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "chapter_2_enabled",
+      "label": "Enable chapter 2",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "chapter_2_label",
+      "label": "Label",
+      "default": "CURATED"
+    },
+    {
+      "type": "text",
+      "id": "chapter_2_headline",
+      "label": "Headline",
+      "default": "Elevated essentials"
+    },
+    {
+      "type": "textarea",
+      "id": "chapter_2_description",
+      "label": "Description",
+      "default": "Where form meets function in perfect harmony. Designed to complement your lifestyle with understated sophistication."
+    },
+    {
+      "type": "image_picker",
+      "id": "chapter_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Chapter 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "chapter_3_enabled",
+      "label": "Enable chapter 3",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "chapter_3_label",
+      "label": "Label",
+      "default": "REFINED"
+    },
+    {
+      "type": "text",
+      "id": "chapter_3_headline",
+      "label": "Headline",
+      "default": "Timeless by design"
+    },
+    {
+      "type": "textarea",
+      "id": "chapter_3_description",
+      "label": "Description",
+      "default": "Pieces that speak quietly yet command attention. An investment in quality that rewards with every wear."
+    },
+    {
+      "type": "image_picker",
+      "id": "chapter_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Chapter 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "chapter_4_enabled",
+      "label": "Enable chapter 4",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "chapter_4_label",
+      "label": "Label",
+      "default": "SIGNATURE"
+    },
+    {
+      "type": "text",
+      "id": "chapter_4_headline",
+      "label": "Headline",
+      "default": "Uncompromising quality"
+    },
+    {
+      "type": "textarea",
+      "id": "chapter_4_description",
+      "label": "Description",
+      "default": "The culmination of meticulous craftsmanship and thoughtful design. For those who appreciate the finer details."
+    },
+    {
+      "type": "image_picker",
+      "id": "chapter_4_image",
+      "label": "Image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial scroll"
+    }
+  ]
+}
+{% endschema %}

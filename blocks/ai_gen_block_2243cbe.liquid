@@ -1,0 +1,811 @@
+{% doc %}
+  @prompt
+    Create a luxury category card section with product images, category names, and a circular arrow icon. Cards should have subtle hover effects where the arrow changes color and gently moves, with smooth transitions and a clean editorial look. The design should feel premium, minimal, and fashion-forward, with the entire card clickable., I want the collection should be in carousel form on mobile and desktop, This also should come with load time animation
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-category-cards-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_top }}px 0 {{ block.settings.section_padding_bottom }}px;
+    overflow: hidden;
+  }
+
+  .ai-category-cards__container-{{ ai_gen_id }} {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+  }
+
+  .ai-category-cards__carousel-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-category-cards__carousel-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.grid_gap }}px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 10px;
+  }
+
+  .ai-category-cards__carousel-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-category-card-{{ ai_gen_id }} {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    overflow: hidden;
+    background-color: {{ block.settings.card_background }};
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    flex: 0 0 calc((100% - ({{ block.settings.columns_desktop | minus: 1 }} * {{ block.settings.grid_gap }}px)) / {{ block.settings.columns_desktop }});
+    scroll-snap-align: start;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .ai-category-card-{{ ai_gen_id }}.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .ai-category-card-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+  }
+
+  .ai-category-card__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: {{ block.settings.image_aspect_ratio }}%;
+    overflow: hidden;
+    background-color: #f5f5f5;
+  }
+
+  .ai-category-card__image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .ai-category-card-{{ ai_gen_id }}:hover .ai-category-card__image-{{ ai_gen_id }} {
+    transform: scale(1.05);
+  }
+
+  .ai-category-card__image-placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+  }
+
+  .ai-category-card__image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-category-card__content-{{ ai_gen_id }} {
+    padding: {{ block.settings.card_padding }}px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .ai-category-card__title-{{ ai_gen_id }} {
+    margin: 0;
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: {{ block.settings.title_weight }};
+    color: {{ block.settings.title_color }};
+    letter-spacing: {{ block.settings.title_letter_spacing }}px;
+    text-transform: {% if block.settings.title_uppercase %}uppercase{% else %}none{% endif %};
+    transition: color 0.3s ease;
+  }
+
+  .ai-category-card-{{ ai_gen_id }}:hover .ai-category-card__title-{{ ai_gen_id }} {
+    color: {{ block.settings.title_hover_color }};
+  }
+
+  .ai-category-card__arrow-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    border-radius: 50%;
+    border: {{ block.settings.arrow_border_width }}px solid {{ block.settings.arrow_color }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .ai-category-card-{{ ai_gen_id }}:hover .ai-category-card__arrow-{{ ai_gen_id }} {
+    border-color: {{ block.settings.arrow_hover_color }};
+    background-color: {{ block.settings.arrow_hover_background }};
+    transform: translateX(4px);
+  }
+
+  .ai-category-card__arrow-icon-{{ ai_gen_id }} {
+    width: 50%;
+    height: 50%;
+    stroke: {{ block.settings.arrow_color }};
+    transition: stroke 0.4s ease;
+  }
+
+  .ai-category-card-{{ ai_gen_id }}:hover .ai-category-card__arrow-icon-{{ ai_gen_id }} {
+    stroke: {{ block.settings.arrow_hover_color }};
+  }
+
+  .ai-category-cards__nav-{{ ai_gen_id }} {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 30px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .ai-category-cards__nav-{{ ai_gen_id }}.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s;
+  }
+
+  .ai-category-cards__nav-button-{{ ai_gen_id }} {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: {{ block.settings.arrow_border_width }}px solid {{ block.settings.arrow_color }};
+    background-color: {{ block.settings.card_background }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .ai-category-cards__nav-button-{{ ai_gen_id }}:hover {
+    border-color: {{ block.settings.arrow_hover_color }};
+    background-color: {{ block.settings.arrow_hover_background }};
+  }
+
+  .ai-category-cards__nav-button-{{ ai_gen_id }}:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .ai-category-cards__nav-button-{{ ai_gen_id }}:disabled:hover {
+    border-color: {{ block.settings.arrow_color }};
+    background-color: {{ block.settings.card_background }};
+  }
+
+  .ai-category-cards__nav-icon-{{ ai_gen_id }} {
+    width: 20px;
+    height: 20px;
+    stroke: {{ block.settings.arrow_color }};
+    transition: stroke 0.3s ease;
+  }
+
+  .ai-category-cards__nav-button-{{ ai_gen_id }}:hover .ai-category-cards__nav-icon-{{ ai_gen_id }} {
+    stroke: {{ block.settings.arrow_hover_color }};
+  }
+
+  .ai-category-cards__nav-button-{{ ai_gen_id }}:disabled .ai-category-cards__nav-icon-{{ ai_gen_id }} {
+    stroke: {{ block.settings.arrow_color }};
+  }
+
+  .ai-category-cards__dots-{{ ai_gen_id }} {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .ai-category-cards__dots-{{ ai_gen_id }}.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease 0.9s, transform 0.6s ease 0.9s;
+  }
+
+  .ai-category-cards__dot-{{ ai_gen_id }} {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: {{ block.settings.arrow_color }};
+    opacity: 0.3;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+  }
+
+  .ai-category-cards__dot-{{ ai_gen_id }}.active {
+    opacity: 1;
+    background-color: {{ block.settings.arrow_hover_background }};
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-category-card-{{ ai_gen_id }} {
+      flex: 0 0 calc((100% - {{ block.settings.grid_gap }}px) / 2);
+    }
+
+    .ai-category-card__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.9 }}px;
+    }
+
+    .ai-category-card__arrow-{{ ai_gen_id }} {
+      width: {{ block.settings.arrow_size | times: 0.9 }}px;
+      height: {{ block.settings.arrow_size | times: 0.9 }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-category-card-{{ ai_gen_id }} {
+      flex: 0 0 calc((100% - ({{ block.settings.columns_mobile | minus: 1 }} * {{ block.settings.grid_gap | times: 0.6 }}px)) / {{ block.settings.columns_mobile }});
+    }
+
+    .ai-category-cards__carousel-{{ ai_gen_id }} {
+      gap: {{ block.settings.grid_gap | times: 0.6 }}px;
+    }
+
+    .ai-category-card__content-{{ ai_gen_id }} {
+      padding: {{ block.settings.card_padding | times: 0.8 }}px;
+    }
+
+    .ai-category-card__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-category-card__arrow-{{ ai_gen_id }} {
+      width: {{ block.settings.arrow_size | times: 0.8 }}px;
+      height: {{ block.settings.arrow_size | times: 0.8 }}px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-category-card-{{ ai_gen_id }} {
+      opacity: 1;
+      transform: none;
+    }
+
+    .ai-category-cards__nav-{{ ai_gen_id }},
+    .ai-category-cards__dots-{{ ai_gen_id }} {
+      opacity: 1;
+      transform: none;
+    }
+  }
+{% endstyle %}
+
+<luxury-category-cards-{{ ai_gen_id }} class="ai-category-cards-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-category-cards__container-{{ ai_gen_id }}">
+    <div class="ai-category-cards__carousel-wrapper-{{ ai_gen_id }}">
+      <div class="ai-category-cards__carousel-{{ ai_gen_id }}" data-carousel>
+        {% for i in (1..6) %}
+          {% liquid
+            assign collection_key = 'collection_' | append: i
+            assign collection = block.settings[collection_key]
+          %}
+
+          {% if collection != blank %}
+            <a href="{{ collection.url }}" class="ai-category-card-{{ ai_gen_id }}" data-card data-index="{{ forloop.index0 }}">
+              <div class="ai-category-card__image-wrapper-{{ ai_gen_id }}">
+                {% if collection.featured_image %}
+                  <img
+                    src="{{ collection.featured_image | image_url: width: 800 }}"
+                    alt="{{ collection.featured_image.alt | default: collection.title | escape }}"
+                    loading="lazy"
+                    width="800"
+                    height="{{ 800 | times: block.settings.image_aspect_ratio | divided_by: 100 }}"
+                    class="ai-category-card__image-{{ ai_gen_id }}"
+                  >
+                {% else %}
+                  <div class="ai-category-card__image-placeholder-{{ ai_gen_id }}">
+                    {{ 'collection-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="ai-category-card__content-{{ ai_gen_id }}">
+                <h3 class="ai-category-card__title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+                <div class="ai-category-card__arrow-{{ ai_gen_id }}">
+                  <svg class="ai-category-card__arrow-icon-{{ ai_gen_id }}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if block.settings.show_navigation %}
+      <div class="ai-category-cards__nav-{{ ai_gen_id }}" data-nav>
+        <button class="ai-category-cards__nav-button-{{ ai_gen_id }}" data-prev aria-label="Previous">
+          <svg class="ai-category-cards__nav-icon-{{ ai_gen_id }}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="ai-category-cards__nav-button-{{ ai_gen_id }}" data-next aria-label="Next">
+          <svg class="ai-category-cards__nav-icon-{{ ai_gen_id }}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    {% endif %}
+
+    {% if block.settings.show_dots %}
+      <div class="ai-category-cards__dots-{{ ai_gen_id }}" data-dots></div>
+    {% endif %}
+  </div>
+</luxury-category-cards-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class LuxuryCategoryCards{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.carousel = null;
+        this.prevButton = null;
+        this.nextButton = null;
+        this.dotsContainer = null;
+        this.navContainer = null;
+        this.cards = [];
+        this.currentIndex = 0;
+        this.itemsPerView = 1;
+        this.hasAnimated = false;
+      }
+
+      connectedCallback() {
+        this.carousel = this.querySelector('[data-carousel]');
+        this.prevButton = this.querySelector('[data-prev]');
+        this.nextButton = this.querySelector('[data-next]');
+        this.dotsContainer = this.querySelector('[data-dots]');
+        this.navContainer = this.querySelector('[data-nav]');
+        this.cards = Array.from(this.querySelectorAll('[data-card]'));
+
+        if (!this.carousel || this.cards.length === 0) return;
+
+        this.calculateItemsPerView();
+        this.setupNavigation();
+        this.setupDots();
+        this.updateNavigation();
+        this.setupLoadAnimation();
+
+        window.addEventListener('resize', () => {
+          this.calculateItemsPerView();
+          this.setupDots();
+          this.updateNavigation();
+        });
+
+        this.carousel.addEventListener('scroll', () => {
+          this.updateCurrentIndex();
+          this.updateNavigation();
+        });
+      }
+
+      setupLoadAnimation() {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        
+        if (prefersReducedMotion) {
+          this.cards.forEach(card => card.classList.add('animate-in'));
+          if (this.navContainer) this.navContainer.classList.add('animate-in');
+          if (this.dotsContainer) this.dotsContainer.classList.add('animate-in');
+          return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && !this.hasAnimated) {
+              this.hasAnimated = true;
+              this.animateCards();
+              observer.disconnect();
+            }
+          });
+        }, {
+          threshold: 0.1
+        });
+
+        observer.observe(this);
+      }
+
+      animateCards() {
+        this.cards.forEach((card, index) => {
+          setTimeout(() => {
+            card.style.transition = `opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.1}s, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.1}s`;
+            card.classList.add('animate-in');
+          }, 50);
+        });
+
+        if (this.navContainer) {
+          setTimeout(() => {
+            this.navContainer.classList.add('animate-in');
+          }, this.cards.length * 100 + 200);
+        }
+
+        if (this.dotsContainer) {
+          setTimeout(() => {
+            this.dotsContainer.classList.add('animate-in');
+          }, this.cards.length * 100 + 300);
+        }
+      }
+
+      calculateItemsPerView() {
+        const width = window.innerWidth;
+        if (width <= 749) {
+          this.itemsPerView = {{ block.settings.columns_mobile }};
+        } else if (width <= 989) {
+          this.itemsPerView = 2;
+        } else {
+          this.itemsPerView = {{ block.settings.columns_desktop }};
+        }
+      }
+
+      setupNavigation() {
+        if (this.prevButton) {
+          this.prevButton.addEventListener('click', () => this.scrollPrev());
+        }
+        if (this.nextButton) {
+          this.nextButton.addEventListener('click', () => this.scrollNext());
+        }
+      }
+
+      setupDots() {
+        if (!this.dotsContainer) return;
+
+        this.dotsContainer.innerHTML = '';
+        const totalPages = Math.ceil(this.cards.length / this.itemsPerView);
+
+        for (let i = 0; i < totalPages; i++) {
+          const dot = document.createElement('button');
+          dot.className = 'ai-category-cards__dot-{{ ai_gen_id }}';
+          dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+          if (i === 0) dot.classList.add('active');
+          
+          dot.addEventListener('click', () => {
+            const scrollAmount = this.cards[i * this.itemsPerView].offsetLeft - this.carousel.offsetLeft;
+            this.carousel.scrollTo({
+              left: scrollAmount,
+              behavior: 'smooth'
+            });
+          });
+
+          this.dotsContainer.appendChild(dot);
+        }
+      }
+
+      updateCurrentIndex() {
+        const scrollLeft = this.carousel.scrollLeft;
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.grid_gap }};
+        this.currentIndex = Math.round(scrollLeft / (cardWidth + gap));
+        this.updateDots();
+      }
+
+      updateDots() {
+        if (!this.dotsContainer) return;
+
+        const dots = this.dotsContainer.querySelectorAll('.ai-category-cards__dot-{{ ai_gen_id }}');
+        const currentPage = Math.floor(this.currentIndex / this.itemsPerView);
+
+        dots.forEach((dot, index) => {
+          if (index === currentPage) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      scrollPrev() {
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.grid_gap }};
+        const scrollAmount = (cardWidth + gap) * this.itemsPerView;
+        
+        this.carousel.scrollBy({
+          left: -scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+
+      scrollNext() {
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.grid_gap }};
+        const scrollAmount = (cardWidth + gap) * this.itemsPerView;
+        
+        this.carousel.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+
+      updateNavigation() {
+        if (!this.prevButton || !this.nextButton) return;
+
+        const scrollLeft = this.carousel.scrollLeft;
+        const maxScroll = this.carousel.scrollWidth - this.carousel.clientWidth;
+
+        this.prevButton.disabled = scrollLeft <= 0;
+        this.nextButton.disabled = scrollLeft >= maxScroll - 1;
+      }
+    }
+
+    customElements.define('luxury-category-cards-{{ ai_gen_id }}', LuxuryCategoryCards{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Luxury category cards",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Columns on desktop",
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Gap between cards",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Carousel controls"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "image_aspect_ratio",
+      "min": 60,
+      "max": 150,
+      "step": 5,
+      "unit": "%",
+      "label": "Image aspect ratio",
+      "default": 125
+    },
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "title_weight",
+      "min": 300,
+      "max": 700,
+      "step": 100,
+      "label": "Weight",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "title_letter_spacing",
+      "min": 0,
+      "max": 3,
+      "step": 0.5,
+      "unit": "px",
+      "label": "Letter spacing",
+      "default": 0.5
+    },
+    {
+      "type": "checkbox",
+      "id": "title_uppercase",
+      "label": "Uppercase",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "title_hover_color",
+      "label": "Hover color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Arrow icon"
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "unit": "px",
+      "label": "Size",
+      "default": 45
+    },
+    {
+      "type": "range",
+      "id": "arrow_border_width",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "label": "Border width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "arrow_hover_color",
+      "label": "Hover color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "arrow_hover_background",
+      "label": "Hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "Luxury category cards"
+    }
+  ]
+}
+{% endschema %}

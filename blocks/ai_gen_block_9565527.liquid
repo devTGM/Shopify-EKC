@@ -1,0 +1,834 @@
+{% doc %}
+  @prompt
+    Design a luxury curated selection section for a premium e-commerce website that sells sneakers, apparel, accessories, and watches.
+    
+    Desktop layout:
+    – Three-column editorial layout
+    – Left column: numbered curated category list (01–04)
+    – Center column: one strong lifestyle or product-led editorial image
+    – Right column: refined headline, short supporting paragraph, and a minimal CTA
+    
+    Left column (Curated list):
+    – Section label in small uppercase text (e.g., “CURATED SELECTION”)
+    – Four numbered categories with strong typographic hierarchy
+    – One active item visually highlighted (underline or weight change)
+    – Subtle hover effect when switching categories (no animation-heavy transitions)
+    
+    Center image:
+    – High-quality editorial or product-lifestyle image
+    – Image updates when category selection changes
+    – No overlays, no gradients
+    
+    Right content:
+    – Headline: calm, editorial, confidence-led
+    – Short paragraph (2–3 lines max) describing the curation philosophy
+    – Minimal text CTA (e.g., “Shop the selection”)
+    
+    Mobile behavior (critical):
+    – Section stacks vertically
+    – Order:
+    
+    Section label + headline
+    
+    Editorial image
+    
+    Curated category list (horizontal scroll or vertical list)
+    
+    CTA at the bottom
+    – No three-column layout on mobile
+    – No tiny text or overlapping content
+    
+    Interaction & UX:
+    – Category switching feels instant and calm
+    – No sliders with dots
+    – No autoplay
+    – Entire category row is tappable on mobile
+    
+    Style & tone:
+    – Luxury, editorial, restrained
+    – Plenty of white space
+    – No promotional language
+    – Designed to feel like a curated gallery, not a product filter
+    
+    Performance:
+    – Lightweight transitions (150–250ms ease-in-out)
+    – Mobile-first responsive behavior, i need option for image ratio, I need Option to adjust gap between Label and Category Name, I want sections to switch on Hover with animation on image and Content
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-curated-selection-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_top }}px 0 {{ block.settings.section_padding_bottom }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-curated-selection__container-{{ ai_gen_id }} {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .ai-curated-selection__grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .ai-curated-selection__left-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.label_category_gap }}px;
+  }
+
+  .ai-curated-selection__label-{{ ai_gen_id }} {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: {{ block.settings.label_color }};
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .ai-curated-selection__categories-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .ai-curated-selection__category-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  .ai-curated-selection__category-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  .ai-curated-selection__category-number-{{ ai_gen_id }} {
+    font-size: 14px;
+    color: {{ block.settings.number_color }};
+    font-weight: 300;
+    min-width: 24px;
+  }
+
+  .ai-curated-selection__category-name-{{ ai_gen_id }} {
+    font-size: {{ block.settings.category_font_size }}px;
+    color: {{ block.settings.category_color }};
+    font-weight: 400;
+    position: relative;
+    transition: font-weight 0.2s ease-in-out;
+  }
+
+  .ai-curated-selection__category-{{ ai_gen_id }}.active .ai-curated-selection__category-name-{{ ai_gen_id }} {
+    font-weight: 600;
+  }
+
+  .ai-curated-selection__category-{{ ai_gen_id }}.active .ai-curated-selection__category-name-{{ ai_gen_id }}::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: {{ block.settings.category_color }};
+  }
+
+  .ai-curated-selection__center-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  {% if block.settings.image_ratio == 'portrait' %}
+    .ai-curated-selection__center-{{ ai_gen_id }} {
+      aspect-ratio: 3 / 4;
+    }
+  {% elsif block.settings.image_ratio == 'square' %}
+    .ai-curated-selection__center-{{ ai_gen_id }} {
+      aspect-ratio: 1 / 1;
+    }
+  {% elsif block.settings.image_ratio == 'landscape' %}
+    .ai-curated-selection__center-{{ ai_gen_id }} {
+      aspect-ratio: 4 / 3;
+    }
+  {% elsif block.settings.image_ratio == 'wide' %}
+    .ai-curated-selection__center-{{ ai_gen_id }} {
+      aspect-ratio: 16 / 9;
+    }
+  {% endif %}
+
+  .ai-curated-selection__image-wrapper-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+  }
+
+  .ai-curated-selection__image-wrapper-{{ ai_gen_id }}.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .ai-curated-selection__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-curated-selection__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-curated-selection__image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 300px;
+    opacity: 0.3;
+  }
+
+  .ai-curated-selection__right-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .ai-curated-selection__content-wrapper-{{ ai_gen_id }} {
+    position: relative;
+  }
+
+  .ai-curated-selection__content-item-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+    pointer-events: none;
+  }
+
+  .ai-curated-selection__content-item-{{ ai_gen_id }}.active {
+    position: relative;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .ai-curated-selection__headline-{{ ai_gen_id }} {
+    font-size: {{ block.settings.headline_font_size }}px;
+    line-height: 1.2;
+    color: {{ block.settings.headline_color }};
+    font-weight: 400;
+    margin: 0 0 24px 0;
+  }
+
+  .ai-curated-selection__description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_font_size }}px;
+    line-height: 1.6;
+    color: {{ block.settings.description_color }};
+    margin: 0 0 24px 0;
+  }
+
+  .ai-curated-selection__cta-{{ ai_gen_id }} {
+    display: inline-block;
+    font-size: {{ block.settings.cta_font_size }}px;
+    color: {{ block.settings.cta_color }};
+    text-decoration: none;
+    border-bottom: 1px solid {{ block.settings.cta_color }};
+    padding-bottom: 2px;
+    transition: opacity 0.2s ease-in-out;
+    align-self: flex-start;
+  }
+
+  .ai-curated-selection__cta-{{ ai_gen_id }}:hover {
+    opacity: 0.6;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-curated-selection__container-{{ ai_gen_id }} {
+      padding: 0 24px;
+    }
+
+    .ai-curated-selection__grid-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .ai-curated-selection__left-{{ ai_gen_id }} {
+      order: 1;
+      gap: 20px;
+    }
+
+    .ai-curated-selection__center-{{ ai_gen_id }} {
+      order: 2;
+    }
+
+    {% if block.settings.image_ratio == 'portrait' %}
+      .ai-curated-selection__center-{{ ai_gen_id }} {
+        aspect-ratio: 4 / 5;
+      }
+    {% elsif block.settings.image_ratio == 'square' %}
+      .ai-curated-selection__center-{{ ai_gen_id }} {
+        aspect-ratio: 1 / 1;
+      }
+    {% elsif block.settings.image_ratio == 'landscape' %}
+      .ai-curated-selection__center-{{ ai_gen_id }} {
+        aspect-ratio: 4 / 3;
+      }
+    {% elsif block.settings.image_ratio == 'wide' %}
+      .ai-curated-selection__center-{{ ai_gen_id }} {
+        aspect-ratio: 16 / 9;
+      }
+    {% endif %}
+
+    .ai-curated-selection__right-{{ ai_gen_id }} {
+      order: 3;
+    }
+
+    .ai-curated-selection__categories-{{ ai_gen_id }} {
+      flex-direction: row;
+      overflow-x: auto;
+      gap: 32px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .ai-curated-selection__categories-{{ ai_gen_id }}::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ai-curated-selection__category-{{ ai_gen_id }} {
+      flex-shrink: 0;
+      padding: 12px 0;
+    }
+
+    .ai-curated-selection__headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_font_size | times: 0.75 }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-curated-selection__container-{{ ai_gen_id }} {
+      padding: 0 16px;
+    }
+
+    .ai-curated-selection__grid-{{ ai_gen_id }} {
+      gap: 32px;
+    }
+
+    .ai-curated-selection__headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_font_size | times: 0.6 }}px;
+    }
+
+    .ai-curated-selection__category-name-{{ ai_gen_id }} {
+      font-size: {{ block.settings.category_font_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<curated-selection-{{ ai_gen_id }} class="ai-curated-selection-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-curated-selection__container-{{ ai_gen_id }}">
+    <div class="ai-curated-selection__grid-{{ ai_gen_id }}">
+      <div class="ai-curated-selection__left-{{ ai_gen_id }}">
+        {% if block.settings.section_label != blank %}
+          <p class="ai-curated-selection__label-{{ ai_gen_id }}">{{ block.settings.section_label }}</p>
+        {% endif %}
+        
+        <div class="ai-curated-selection__categories-{{ ai_gen_id }}">
+          {% for i in (1..4) %}
+            {% liquid
+              assign category_name_key = 'category_' | append: i | append: '_name'
+              assign category_name = block.settings[category_name_key]
+            %}
+            
+            {% if category_name != blank %}
+              <button 
+                class="ai-curated-selection__category-{{ ai_gen_id }} {% if i == 1 %}active{% endif %}"
+                data-category="{{ i }}"
+                aria-label="View {{ category_name }}"
+              >
+                <span class="ai-curated-selection__category-number-{{ ai_gen_id }}">0{{ i }}</span>
+                <span class="ai-curated-selection__category-name-{{ ai_gen_id }}">{{ category_name }}</span>
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="ai-curated-selection__center-{{ ai_gen_id }}">
+        {% for i in (1..4) %}
+          {% liquid
+            assign image_key = 'category_' | append: i | append: '_image'
+            assign category_image = block.settings[image_key]
+            assign category_name_key = 'category_' | append: i | append: '_name'
+            assign category_name = block.settings[category_name_key]
+          %}
+          
+          <div 
+            class="ai-curated-selection__image-wrapper-{{ ai_gen_id }} {% if i == 1 %}active{% endif %}"
+            data-image="{{ i }}"
+          >
+            {% if category_image %}
+              <img
+                src="{{ category_image | image_url: width: 1200 }}"
+                alt="{{ category_name | escape }}"
+                loading="lazy"
+                width="{{ category_image.width }}"
+                height="{{ category_image.height }}"
+                class="ai-curated-selection__image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-curated-selection__image-placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="ai-curated-selection__right-{{ ai_gen_id }}">
+        <div class="ai-curated-selection__content-wrapper-{{ ai_gen_id }}">
+          {% for i in (1..4) %}
+            {% liquid
+              assign headline_key = 'category_' | append: i | append: '_headline'
+              assign description_key = 'category_' | append: i | append: '_description'
+              assign cta_text_key = 'category_' | append: i | append: '_cta_text'
+              assign cta_link_key = 'category_' | append: i | append: '_cta_link'
+              
+              assign headline = block.settings[headline_key]
+              assign description = block.settings[description_key]
+              assign cta_text = block.settings[cta_text_key]
+              assign cta_link = block.settings[cta_link_key]
+            %}
+            
+            <div 
+              class="ai-curated-selection__content-item-{{ ai_gen_id }} {% if i == 1 %}active{% endif %}"
+              data-content="{{ i }}"
+            >
+              {% if headline != blank %}
+                <h2 class="ai-curated-selection__headline-{{ ai_gen_id }}">{{ headline }}</h2>
+              {% endif %}
+              
+              {% if description != blank %}
+                <div class="ai-curated-selection__description-{{ ai_gen_id }}">{{ description }}</div>
+              {% endif %}
+              
+              {% if cta_text != blank and cta_link != blank %}
+                <a href="{{ cta_link }}" class="ai-curated-selection__cta-{{ ai_gen_id }}">
+                  {{ cta_text }}
+                </a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</curated-selection-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CuratedSelection{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.categoryButtons = this.querySelectorAll('.ai-curated-selection__category-{{ ai_gen_id }}');
+        this.imageWrappers = this.querySelectorAll('.ai-curated-selection__image-wrapper-{{ ai_gen_id }}');
+        this.contentItems = this.querySelectorAll('.ai-curated-selection__content-item-{{ ai_gen_id }}');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.categoryButtons.forEach((button) => {
+          button.addEventListener('mouseenter', () => {
+            const categoryId = button.getAttribute('data-category');
+            this.switchCategory(categoryId);
+          });
+          
+          button.addEventListener('click', () => {
+            const categoryId = button.getAttribute('data-category');
+            this.switchCategory(categoryId);
+          });
+        });
+      }
+
+      switchCategory(categoryId) {
+        this.categoryButtons.forEach((btn) => {
+          if (btn.getAttribute('data-category') === categoryId) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+
+        this.imageWrappers.forEach((wrapper) => {
+          if (wrapper.getAttribute('data-image') === categoryId) {
+            wrapper.classList.add('active');
+          } else {
+            wrapper.classList.remove('active');
+          }
+        });
+
+        this.contentItems.forEach((item) => {
+          if (item.getAttribute('data-content') === categoryId) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+    }
+
+    customElements.define('curated-selection-{{ ai_gen_id }}', CuratedSelection{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Curated selection",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section label"
+    },
+    {
+      "type": "text",
+      "id": "section_label",
+      "label": "Label",
+      "default": "CURATED SELECTION"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "label_category_gap",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Gap between label and categories",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Category 1"
+    },
+    {
+      "type": "text",
+      "id": "category_1_name",
+      "label": "Name",
+      "default": "Sneakers"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_1_headline",
+      "label": "Headline",
+      "default": "Refined essentials for the modern wardrobe"
+    },
+    {
+      "type": "richtext",
+      "id": "category_1_description",
+      "label": "Description",
+      "default": "<p>Each piece is carefully selected for its craftsmanship, timeless design, and enduring quality.</p>"
+    },
+    {
+      "type": "text",
+      "id": "category_1_cta_text",
+      "label": "CTA text",
+      "default": "Shop the selection"
+    },
+    {
+      "type": "url",
+      "id": "category_1_cta_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "header",
+      "content": "Category 2"
+    },
+    {
+      "type": "text",
+      "id": "category_2_name",
+      "label": "Name",
+      "default": "Apparel"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_2_headline",
+      "label": "Headline",
+      "default": "Elevated everyday essentials"
+    },
+    {
+      "type": "richtext",
+      "id": "category_2_description",
+      "label": "Description",
+      "default": "<p>Thoughtfully designed apparel that balances comfort with contemporary style.</p>"
+    },
+    {
+      "type": "text",
+      "id": "category_2_cta_text",
+      "label": "CTA text",
+      "default": "Explore apparel"
+    },
+    {
+      "type": "url",
+      "id": "category_2_cta_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "header",
+      "content": "Category 3"
+    },
+    {
+      "type": "text",
+      "id": "category_3_name",
+      "label": "Name",
+      "default": "Accessories"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_3_headline",
+      "label": "Headline",
+      "default": "The finishing touch"
+    },
+    {
+      "type": "richtext",
+      "id": "category_3_description",
+      "label": "Description",
+      "default": "<p>Curated accessories that complete your look with understated elegance.</p>"
+    },
+    {
+      "type": "text",
+      "id": "category_3_cta_text",
+      "label": "CTA text",
+      "default": "View accessories"
+    },
+    {
+      "type": "url",
+      "id": "category_3_cta_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "header",
+      "content": "Category 4"
+    },
+    {
+      "type": "text",
+      "id": "category_4_name",
+      "label": "Name",
+      "default": "Watches"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_4_headline",
+      "label": "Headline",
+      "default": "Timeless precision"
+    },
+    {
+      "type": "richtext",
+      "id": "category_4_description",
+      "label": "Description",
+      "default": "<p>Exceptional timepieces that blend heritage craftsmanship with modern design.</p>"
+    },
+    {
+      "type": "text",
+      "id": "category_4_cta_text",
+      "label": "CTA text",
+      "default": "Discover watches"
+    },
+    {
+      "type": "url",
+      "id": "category_4_cta_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        {
+          "value": "portrait",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "square",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape (4:3)"
+        },
+        {
+          "value": "wide",
+          "label": "Wide (16:9)"
+        }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "headline_font_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Headline size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "category_font_size",
+      "min": 14,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "label": "Category size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "cta_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "CTA size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Headline",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "category_color",
+      "label": "Category",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Number",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "cta_color",
+      "label": "CTA",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Curated selection"
+    }
+  ]
+}
+{% endschema %}

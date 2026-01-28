@@ -1,0 +1,772 @@
+{% doc %}
+  @prompt
+    Create a premium category list section where Main Category is shown in Tabs and sub categories and shown under the main category's tab, This is perfect , just need the control of number of columns , Need Option to select font
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-category-tabs-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: 60px 20px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-category-tabs-container-{{ ai_gen_id }} {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: {{ block.settings.desktop_width_percent }}%;
+  }
+
+  .ai-category-tabs-header-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .ai-category-tabs-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 12px;
+    font-weight: 600;
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    font-style: {{ block.settings.heading_font.style }};
+  }
+
+  .ai-category-tabs-subtitle-{{ ai_gen_id }} {
+    font-size: {{ block.settings.subtitle_size }}px;
+    color: {{ block.settings.subtitle_color }};
+    margin: 0;
+    font-family: {{ block.settings.subtitle_font.family }}, {{ block.settings.subtitle_font.fallback_families }};
+    font-weight: {{ block.settings.subtitle_font.weight }};
+    font-style: {{ block.settings.subtitle_font.style }};
+  }
+
+  .ai-category-tabs-nav-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    border-bottom: {{ block.settings.tab_border_width }}px solid {{ block.settings.tab_border_color }};
+    padding-bottom: 0;
+  }
+
+  .ai-category-tab-button-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    padding: 16px 32px;
+    font-size: {{ block.settings.tab_font_size }}px;
+    color: {{ block.settings.tab_text_color }};
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    border-bottom: {{ block.settings.tab_border_width }}px solid transparent;
+    margin-bottom: -{{ block.settings.tab_border_width }}px;
+    font-weight: 500;
+    font-family: {{ block.settings.tab_font.family }}, {{ block.settings.tab_font.fallback_families }};
+    font-weight: {{ block.settings.tab_font.weight }};
+    font-style: {{ block.settings.tab_font.style }};
+  }
+
+  .ai-category-tab-button-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.tab_hover_color }};
+  }
+
+  .ai-category-tab-button-{{ ai_gen_id }}.active {
+    color: {{ block.settings.tab_active_color }};
+    border-bottom-color: {{ block.settings.tab_active_border_color }};
+    font-weight: 600;
+  }
+
+  .ai-category-tabs-content-{{ ai_gen_id }} {
+    position: relative;
+  }
+
+  .ai-category-tab-panel-{{ ai_gen_id }} {
+    display: none;
+  }
+
+  .ai-category-tab-panel-{{ ai_gen_id }}.active {
+    display: block;
+  }
+
+  .ai-category-subcategories-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat({{ block.settings.columns_desktop }}, 1fr);
+    gap: {{ block.settings.card_gap }}px;
+  }
+
+  .ai-category-card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    text-decoration: none;
+    display: block;
+  }
+
+  .ai-category-card-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .ai-category-card-image-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: {{ block.settings.image_aspect_ratio }};
+    overflow: hidden;
+    background-color: #f5f5f5;
+  }
+
+  .ai-category-card-image-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-category-card-{{ ai_gen_id }}:hover .ai-category-card-image-{{ ai_gen_id }} img {
+    transform: scale(1.05);
+  }
+
+  .ai-category-card-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+  }
+
+  .ai-category-card-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-category-card-content-{{ ai_gen_id }} {
+    padding: 20px;
+  }
+
+  .ai-category-card-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_title_size }}px;
+    color: {{ block.settings.card_title_color }};
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-family: {{ block.settings.card_title_font.family }}, {{ block.settings.card_title_font.fallback_families }};
+    font-weight: {{ block.settings.card_title_font.weight }};
+    font-style: {{ block.settings.card_title_font.style }};
+  }
+
+  .ai-category-card-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_description_size }}px;
+    color: {{ block.settings.card_description_color }};
+    margin: 0 0 12px;
+    line-height: 1.5;
+    font-family: {{ block.settings.card_description_font.family }}, {{ block.settings.card_description_font.fallback_families }};
+    font-weight: {{ block.settings.card_description_font.weight }};
+    font-style: {{ block.settings.card_description_font.style }};
+  }
+
+  .ai-category-card-count-{{ ai_gen_id }} {
+    font-size: 13px;
+    color: {{ block.settings.card_count_color }};
+    font-weight: 500;
+  }
+
+  .ai-category-empty-state-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+  }
+
+  .ai-category-empty-state-{{ ai_gen_id }} svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-category-tabs-container-{{ ai_gen_id }} {
+      width: 100%;
+    }
+
+    .ai-category-subcategories-{{ ai_gen_id }} {
+      grid-template-columns: repeat({{ block.settings.columns_tablet }}, 1fr);
+    }
+
+    .ai-category-tab-button-{{ ai_gen_id }} {
+      padding: 12px 20px;
+      font-size: {{ block.settings.tab_font_size | minus: 2 }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-category-tabs-{{ ai_gen_id }} {
+      padding: 40px 16px;
+    }
+
+    .ai-category-subcategories-{{ ai_gen_id }} {
+      grid-template-columns: repeat({{ block.settings.columns_mobile }}, 1fr);
+    }
+
+    .ai-category-tabs-nav-{{ ai_gen_id }} {
+      gap: 4px;
+    }
+
+    .ai-category-tab-button-{{ ai_gen_id }} {
+      padding: 10px 16px;
+      font-size: {{ block.settings.tab_font_size | minus: 3 }}px;
+    }
+
+    .ai-category-tabs-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size | times: 0.7 }}px;
+    }
+  }
+{% endstyle %}
+
+<category-tabs-{{ ai_gen_id }} class="ai-category-tabs-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-category-tabs-container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank or block.settings.subtitle != blank %}
+      <div class="ai-category-tabs-header-{{ ai_gen_id }}">
+        {% if block.settings.heading != blank %}
+          <h2 class="ai-category-tabs-title-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+        {% endif %}
+        {% if block.settings.subtitle != blank %}
+          <p class="ai-category-tabs-subtitle-{{ ai_gen_id }}">{{ block.settings.subtitle }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="ai-category-tabs-nav-{{ ai_gen_id }}" role="tablist">
+      {% for i in (1..5) %}
+        {% liquid
+          assign main_collection_key = 'main_category_' | append: i
+          assign main_collection = block.settings[main_collection_key]
+        %}
+        {% if main_collection != blank %}
+          <button
+            class="ai-category-tab-button-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-controls="ai-category-panel-{{ ai_gen_id }}-{{ i }}"
+            data-tab="{{ i }}"
+          >
+            {{ main_collection.title }}
+          </button>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="ai-category-tabs-content-{{ ai_gen_id }}">
+      {% for i in (1..5) %}
+        {% liquid
+          assign main_collection_key = 'main_category_' | append: i
+          assign main_collection = block.settings[main_collection_key]
+          assign sub_collections_key = 'sub_categories_' | append: i
+          assign sub_collections = block.settings[sub_collections_key]
+        %}
+        {% if main_collection != blank %}
+          <div
+            class="ai-category-tab-panel-{{ ai_gen_id }} {% if forloop.first %}active{% endif %}"
+            role="tabpanel"
+            id="ai-category-panel-{{ ai_gen_id }}-{{ i }}"
+            aria-labelledby="ai-category-tab-{{ ai_gen_id }}-{{ i }}"
+          >
+            {% if sub_collections != blank and sub_collections.size > 0 %}
+              <div class="ai-category-subcategories-{{ ai_gen_id }}">
+                {% for collection in sub_collections %}
+                  <a href="{{ collection.url }}" class="ai-category-card-{{ ai_gen_id }}">
+                    <div class="ai-category-card-image-{{ ai_gen_id }}">
+                      {% if collection.featured_image %}
+                        <img
+                          src="{{ collection.featured_image | image_url: width: 600 }}"
+                          alt="{{ collection.featured_image.alt | escape }}"
+                          loading="lazy"
+                          width="600"
+                          height="600"
+                        >
+                      {% else %}
+                        <div class="ai-category-card-image-placeholder-{{ ai_gen_id }}">
+                          {{ 'collection-1' | placeholder_svg_tag }}
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div class="ai-category-card-content-{{ ai_gen_id }}">
+                      <h3 class="ai-category-card-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+                      {% if block.settings.show_description and collection.description != blank %}
+                        <p class="ai-category-card-description-{{ ai_gen_id }}">
+                          {{ collection.description | strip_html | truncate: 100 }}
+                        </p>
+                      {% endif %}
+                      {% if block.settings.show_product_count %}
+                        <div class="ai-category-card-count-{{ ai_gen_id }}">
+                          {{ collection.products_count }}
+                          {% if collection.products_count == 1 %}
+                            product
+                          {% else %}
+                            products
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="ai-category-empty-state-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+                <p>Add subcategories for {{ main_collection.title }}</p>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</category-tabs-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CategoryTabs{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.tabs = this.querySelectorAll('.ai-category-tab-button-{{ ai_gen_id }}');
+        this.panels = this.querySelectorAll('.ai-category-tab-panel-{{ ai_gen_id }}');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.tabs.forEach((tab) => {
+          tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            this.switchTab(tabId);
+          });
+        });
+      }
+
+      switchTab(tabId) {
+        this.tabs.forEach((tab) => {
+          const isActive = tab.getAttribute('data-tab') === tabId;
+          tab.classList.toggle('active', isActive);
+          tab.setAttribute('aria-selected', isActive);
+        });
+
+        this.panels.forEach((panel, index) => {
+          const panelId = (index + 1).toString();
+          panel.classList.toggle('active', panelId === tabId);
+        });
+      }
+    }
+
+    customElements.define('category-tabs-{{ ai_gen_id }}', CategoryTabs{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Premium category tabs",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Explore our curated collections"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Main category 1"
+    },
+    {
+      "type": "collection",
+      "id": "main_category_1",
+      "label": "Main category"
+    },
+    {
+      "type": "collection_list",
+      "id": "sub_categories_1",
+      "label": "Subcategories",
+      "limit": 12
+    },
+    {
+      "type": "header",
+      "content": "Main category 2"
+    },
+    {
+      "type": "collection",
+      "id": "main_category_2",
+      "label": "Main category"
+    },
+    {
+      "type": "collection_list",
+      "id": "sub_categories_2",
+      "label": "Subcategories",
+      "limit": 12
+    },
+    {
+      "type": "header",
+      "content": "Main category 3"
+    },
+    {
+      "type": "collection",
+      "id": "main_category_3",
+      "label": "Main category"
+    },
+    {
+      "type": "collection_list",
+      "id": "sub_categories_3",
+      "label": "Subcategories",
+      "limit": 12
+    },
+    {
+      "type": "header",
+      "content": "Main category 4"
+    },
+    {
+      "type": "collection",
+      "id": "main_category_4",
+      "label": "Main category"
+    },
+    {
+      "type": "collection_list",
+      "id": "sub_categories_4",
+      "label": "Subcategories",
+      "limit": 12
+    },
+    {
+      "type": "header",
+      "content": "Main category 5"
+    },
+    {
+      "type": "collection",
+      "id": "main_category_5",
+      "label": "Main category"
+    },
+    {
+      "type": "collection_list",
+      "id": "sub_categories_5",
+      "label": "Subcategories",
+      "limit": 12
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Columns on tablet",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "header",
+      "content": "Card settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show description",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "label": "Show product count",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image aspect ratio",
+      "options": [
+        {
+          "value": "1 / 1",
+          "label": "Square"
+        },
+        {
+          "value": "4 / 3",
+          "label": "Landscape"
+        },
+        {
+          "value": "3 / 4",
+          "label": "Portrait"
+        },
+        {
+          "value": "16 / 9",
+          "label": "Wide"
+        }
+      ],
+      "default": "1 / 1"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "tab_text_color",
+      "label": "Tab text",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "tab_hover_color",
+      "label": "Tab hover",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_color",
+      "label": "Tab active",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_border_color",
+      "label": "Tab active border",
+      "default": "#c15045"
+    },
+    {
+      "type": "color",
+      "id": "tab_border_color",
+      "label": "Tab border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "card_title_color",
+      "label": "Card title",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "card_description_color",
+      "label": "Card description",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "card_count_color",
+      "label": "Card product count",
+      "default": "#999999"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "font_picker",
+      "id": "subtitle_font",
+      "label": "Subtitle font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "label": "Subtitle size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "font_picker",
+      "id": "tab_font",
+      "label": "Tab font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "tab_font_size",
+      "label": "Tab font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "font_picker",
+      "id": "card_title_font",
+      "label": "Card title font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "label": "Card title size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "font_picker",
+      "id": "card_description_font",
+      "label": "Card description font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "card_description_size",
+      "label": "Card description size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Card border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "tab_border_width",
+      "label": "Tab border width",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium category tabs"
+    }
+  ]
+}
+{% endschema %}
