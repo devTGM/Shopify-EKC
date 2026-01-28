@@ -1,0 +1,373 @@
+
+
+{% liquid
+  # Count enabled slides
+  assign enabled_slide_count = 0
+  for block in section.blocks
+    if block.settings.enabled
+      assign enabled_slide_count = enabled_slide_count | plus: 1
+    endif
+  endfor
+
+  # Autoplay settings
+  if enabled_slide_count > 1
+    assign autoplay = section.settings.autoplay
+  else
+    assign autoplay = false
+  endif
+
+  # Section width class
+  assign section_width_class = 'section--' | append: section.settings.section_width
+
+  # Slideshow class
+  assign slideshow_class = 'hero-slideshow'
+  if enabled_slide_count == 1
+    assign slideshow_class = slideshow_class | append: ' hero-slideshow--single-slide'
+  endif
+
+  # Show arrows
+  assign show_arrows = true
+  if section.settings.icons_style == 'none' or enabled_slide_count <= 1
+    assign show_arrows = false
+  endif
+%}
+
+{%- comment -%} Navigation Controls {%- endcomment -%}
+{% if enabled_slide_count > 1 %}
+  {% capture controls %}
+    {%- render 'slideshow-controls',
+      style: section.settings.pagination_style,
+      autoplay: autoplay,
+      item_count: enabled_slide_count,
+      show_arrows: false,
+      arrows_on_media: true,
+      controls_on_media: true,
+      pagination_position: 'center',
+      icon_style: section.settings.icons_style
+    -%}
+  {% endcapture %}
+{% endif %}
+
+{%- comment -%} Slides Content {%- endcomment -%}
+{% capture slides %}
+  {% content_for 'blocks' %}
+{% endcapture %}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="hero-slideshow-section spacing-style section {{ section_width_class }} color-{{ section.settings.color_scheme }}"
+  style="{% render 'spacing-padding', settings: section.settings %}"
+  data-section-id="{{ section.id }}"
+  data-section-type="hero-slideshow"
+>
+  {% render 'slideshow',
+    class: slideshow_class,
+    controls: controls,
+    show_arrows: show_arrows,
+    icon_style: section.settings.icons_style,
+    icon_shape: section.settings.icons_shape,
+    autoplay: autoplay,
+    autoplay_speed: section.settings.autoplay_speed,
+    slides: slides,
+    slide_count: enabled_slide_count,
+    slide_size: section.settings.slide_height
+  %}
+</div>
+
+{% stylesheet %}
+  .hero-slideshow-section {
+    position: relative;
+  }
+
+  /* Slide height presets */
+  .hero-slideshow slideshow-slide {
+    min-height: var(--slide-min-height, 21.25rem);
+  }
+
+  @media screen and (min-width: 750px) {
+    .hero-slideshow slideshow-slide {
+      min-height: var(--slide-min-height-desktop, 35rem);
+    }
+  }
+
+  /* Single slide - no navigation needed */
+  .hero-slideshow--single-slide slideshow-controls {
+    display: none;
+  }
+
+  /* Arrow styling on hero */
+  .hero-slideshow-section slideshow-arrows .slideshow-control:first-of-type {
+    margin-inline-start: var(--padding-xs);
+  }
+
+  .hero-slideshow-section slideshow-arrows .slideshow-control:last-of-type {
+    margin-inline-end: var(--padding-xs);
+  }
+
+  /* Tablet-specific adjustments (750px to 989px) */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .hero-slideshow slideshow-slide {
+      min-height: var(--slide-min-height-desktop, 30rem);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Hero Slideshow",
+  "tag": "section",
+  "class": "hero-slideshow-wrapper section-wrapper",
+  "max_blocks": 8,
+  "blocks": [
+    {
+      "type": "_hero-slide"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page width"
+        },
+        {
+          "value": "full-width",
+          "label": "Full width"
+        }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "select",
+      "id": "slide_height",
+      "label": "Slide height",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "select",
+      "id": "icons_style",
+      "label": "Arrow style",
+      "options": [
+        {
+          "value": "arrow",
+          "label": "Arrows"
+        },
+        {
+          "value": "chevron",
+          "label": "Chevrons"
+        },
+        {
+          "value": "arrows_large",
+          "label": "Large arrows"
+        },
+        {
+          "value": "chevron_large",
+          "label": "Large chevrons"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        }
+      ],
+      "default": "arrows_large"
+    },
+    {
+      "type": "select",
+      "id": "icons_shape",
+      "label": "Arrow background",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "circle",
+          "label": "Circle"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        }
+      ],
+      "default": "circle",
+      "visible_if": "{{ section.settings.icons_style != 'none' }}"
+    },
+    {
+      "type": "select",
+      "id": "pagination_style",
+      "label": "Pagination",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "dots",
+          "label": "Dots"
+        },
+        {
+          "value": "counter",
+          "label": "Counter"
+        }
+      ],
+      "default": "dots"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Rotation speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5,
+      "visible_if": "{{ section.settings.autoplay }}"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "primary"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Slideshow",
+      "category": "Banners",
+      "blocks": {
+        "slide_1": {
+          "type": "_hero-slide",
+          "settings": {
+            "enabled": true,
+            "horizontal_alignment_flex_direction_column": "center",
+            "inherit_color_scheme": false,
+            "color_scheme": "scheme-6",
+            "toggle_overlay": true,
+            "overlay_style": "gradient"
+          },
+          "blocks": {
+            "heading": {
+              "type": "text",
+              "settings": {
+                "text": "<h2>New Arrivals</h2>"
+              }
+            },
+            "text": {
+              "type": "text",
+              "settings": {
+                "text": "Explore our latest collection of products",
+                "padding-block-end": 20
+              }
+            },
+            "button": {
+              "type": "button",
+              "settings": {
+                "label": "Shop Now",
+                "link": "shopify://collections/all"
+              }
+            }
+          },
+          "block_order": ["heading", "text", "button"]
+        },
+        "slide_2": {
+          "type": "_hero-slide",
+          "settings": {
+            "enabled": true,
+            "horizontal_alignment_flex_direction_column": "center",
+            "inherit_color_scheme": false,
+            "color_scheme": "scheme-6",
+            "toggle_overlay": true,
+            "overlay_style": "gradient"
+          },
+          "blocks": {
+            "heading": {
+              "type": "text",
+              "settings": {
+                "text": "<h2>Bestsellers</h2>"
+              }
+            },
+            "text": {
+              "type": "text",
+              "settings": {
+                "text": "Discover our most popular products",
+                "padding-block-end": 20
+              }
+            },
+            "button": {
+              "type": "button",
+              "settings": {
+                "label": "View Collection",
+                "link": "shopify://collections/all"
+              }
+            }
+          },
+          "block_order": ["heading", "text", "button"]
+        }
+      },
+      "block_order": ["slide_1", "slide_2"]
+    }
+  ]
+}
+{% endschema %}
